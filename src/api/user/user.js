@@ -5,6 +5,8 @@ const TestAccount = {
     ["abc@gmail.com"]: "$2a$15$5IdtrBzK0s2Px/oSLvpAxOr/oLPOO1c8WzMlPZVcycE3oOL8Lo17C" //password = admin
 }
 
+async function Signup(email, password, conf_password, ip){
+}
 
 async function Login(email, password, ip){
     if (email == null || password == null) {
@@ -24,19 +26,17 @@ async function Login(email, password, ip){
         const PassCmp = await bcrypt.compare(password, TestAccount[email])
 
         if (!PassCmp){
-            console.log(`[${ip}] Account: ${email} | Logged in successfully!`)
+            console.log(`[${ip}] Account: ${email} | Logged in successfully!`) //Remove in prod?
             return {status: false, message: "Incorrect email or password!"}
         }
-        console.log(`[${ip}] Account: ${email} | Logged in successfully!`)
+        console.log(`[${ip}] Account: ${email} | Logged in successfully!`) //Remove in prod?
         return {status: true, message: "Logged in successfully"}
     } catch (error){
         return {status: false, message: "An error occured! please try again later!"} 
     }
 }
- 
-async function Signup(email, password, conf_password, ip){
-}
 
 module.exports = {
+    Signup: Signup,
     Login: Login
 }

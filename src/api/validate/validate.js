@@ -4,17 +4,17 @@ const NARCRegex = /^[A-Z][8,9]\d{8}$/
 const OARCRegex = /^[A-Z]{2}\d{8}$/
 const EmailRegex =  /.+@.+\..+/
 
-function zipWith(a1, a2, f) {
+function Zip(a1, a2, f) {
     const length = Math.min(a1.length, a2.length);
     const result = [];
     for (let i = 0; i < length; i++)
         result[i] = f(a1[i], a2[i]);
     return result;
 }
-function add(a, b) {
+function Add(a, b) {
     return a + b;
 }
-function multiply(a, b) {
+function Multiply(a, b) {
     return a * b;
 }
 
@@ -34,7 +34,7 @@ function VerifyIntermediate(input) {
         .map(n => parseInt(n, intRadix))
     const idInDigits = [firstDigit, secondDigit, ...rest]
     const ID_COEFFICIENTS = [1, 8, 7, 6, 5, 4, 3, 2, 1, 1]
-    const sum = zipWith(idInDigits, ID_COEFFICIENTS, multiply).reduce(add, 0)
+    const sum = Zip(idInDigits, ID_COEFFICIENTS, Multiply).reduce(Add, 0)
     return sum % 10 === 0
 }
 

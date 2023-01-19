@@ -10,16 +10,14 @@ app.use(express.urlencoded({extended: true}))
 app.use(express.json())
 
 app.post("/login", async (req, res) => {
-    console.log(req.body)
     let CurrentUsr = req.user
     let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
     let email = req.body.email
     let password = req.body.password
-    user.Login(email, password, ip).then(({status, message}) => {
-        console.log(`status: ${status} | message: ${message}`)
+    user.Login(email, password, ip).then(({status, message}) => {   
         return res.status(200).send(message)
     }).catch((error) => {
-        console.log(error)
+        console.log(error)//Remove in prod?
         return res.status(500).send("Internal Server Error!")
     })
 })
@@ -28,10 +26,14 @@ app.post("/signup", async (req, res) => {
     let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
     let email = req.body.email
     let password = req.body.password
-    let conf_passowrd = req.body.conf_password
-    user.signup(email, password, conf_password, ip).then(({status, message}) => {
+    let conf_password = req.body.conf_password
+    console.log(`Email: ${email} | Password: ${password} | Conf_Pasword: ${conf_password}`)
+    return res.status(200).send("Data received!")
+    /*
+    user.Signup(email, password, conf_password, ip).then(({status, message}) => {
 
     })
+    */
 })
 
 app.listen(process.env.PORT, () => {
