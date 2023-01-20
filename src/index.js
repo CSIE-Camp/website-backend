@@ -28,12 +28,9 @@ app.post("/signup", async (req, res) => {
     let password = req.body.password
     let conf_password = req.body.conf_password
     console.log(`Email: ${email} | Password: ${password} | Conf_Pasword: ${conf_password}`)
-    return res.status(200).send("Data received!")
-    /*
     user.Signup(email, password, conf_password, ip).then(({status, message}) => {
 
     })
-    */
 })
 
 app.listen(process.env.PORT, () => {

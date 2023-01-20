@@ -56,6 +56,10 @@ function ValidateNumber(number){
     return PhoneRegex.test(number) && typeof number == "string"
 }
 
+function ValidatePassword(password){
+    
+}
+
 module.exports = {
     ValidateNumber: ValidateNumber,
     ValidateEmail: ValidateEmail,
