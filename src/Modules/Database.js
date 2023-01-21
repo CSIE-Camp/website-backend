@@ -1,0 +1,4 @@
+import {PrimsaClient, PrismaClient} from "@prisma/client"
+
+const prisma = new PrismaClient()
+
