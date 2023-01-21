@@ -16,9 +16,30 @@ model Accounts {
 }
 
 model Profiles {
-  ProfileId Int      @id @default(autoincrement())
-  Account   Accounts @relation(fields: [AccountId], references: [AccountId])
-  AccountId String   @unique
+  ProfileId              Int       @id @default(autoincrement())
+  Account                Accounts  @relation(fields: [AccountId], references: [AccountId])
+  AccountId              String    @unique
+  Name                   String
+  Gender                 String    @db.Char(1)
+  School                 String?
+  DOB                    DateTime?
+  ID_Doc                 String?
+  Number                 String?
+  Facebook               String?
+  Diet                   String
+  Diseases               String?
+  COVID_14Days           Boolean?
+  Emergency_Name         String?
+  Emergency_Number       String?
+  Emergency_Relationship String?
+  Emergency_BloodType    String?
+  Github                 String?
+  Discord                String?
+}
+
+model BloodTypes {
+  Id Int @id @default(autoincrement())
+  BloodType String
 }
 
 enum Roles {
