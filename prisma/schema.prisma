@@ -8,19 +8,19 @@ generator client {
 }
 
 model Accounts {
-  AccountId String    @id @default(cuid())
+  id        String    @id @default(cuid())
   CreatedAt DateTime  @default(now())
   Email     String    @unique
   Password  String?
-  Profiles  Profiles?
+  Profile   Profiles? @relation(fields: [ProfileId], references: [id])
+  ProfileId Int?
 }
 
+//Accounts and Profile should have a 1-1 relationship
 model Profiles {
-  ProfileId              Int       @id @default(autoincrement())
-  Account                Accounts  @relation(fields: [AccountId], references: [AccountId])
-  AccountId              String    @unique
+  id                     Int        @id @default(autoincrement())
   Name                   String
-  Gender                 String    @db.Char(1)
+  Gender                 String     @db.Char(1)
   School                 String?
   DOB                    DateTime?
   ID_Doc                 String?
@@ -35,10 +35,11 @@ model Profiles {
   Emergency_BloodType    String?
   Github                 String?
   Discord                String?
+  Accounts               Accounts[]
 }
 
 model BloodTypes {
-  Id Int @id @default(autoincrement())
+  Id        Int    @id @default(autoincrement())
   BloodType String
 }
 
