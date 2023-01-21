@@ -78,14 +78,11 @@ async function Login(email, password, ip){
 }
 
 async function UpdateProfile(){
-    
+
 }
 
 module.exports = {
     Signup: Signup,
     Login: Login
 }
-/*
-d716a4188569b68ab1b6dfac178e570114cdf0ea3a1cc0e31486c3e41241bc6a76424e8c37ab26f096fc85ef9886c8cb634187f4fddff645fb099f1ff54c6b8c
-d716a4188569b68ab1b6dfac178e570114cdf0ea3a1cc0e31486c3e41241bc6a76424e8c37ab26f096fc85ef9886c8cb634187f4fddff645fb099f1ff54c6b8c
-*/
+
