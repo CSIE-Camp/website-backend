@@ -8,43 +8,43 @@ generator client {
 }
 
 model Accounts {
-  id        String    @id @default(cuid())
-  CreatedAt DateTime  @default(now())
-  Email     String    @unique
+  id        String     @id @default(cuid())
+  CreatedAt DateTime   @default(now())
+  Email     String     @unique
   Password  String?
-  Profile   Profiles? @relation(fields: [ProfileId], references: [id])
-  ProfileId Int?
+  Profiles  Profiles[]
 }
 
 //Accounts and Profile should have a 1-1 relationship
 model Profiles {
-  id                     Int        @id @default(autoincrement())
-  Name                   String
-  Gender                 String     @db.Char(1)
-  School                 String?
-  DOB                    DateTime?
-  ID_Doc                 String?
-  Number                 String?
-  Facebook               String?
-  Diet                   String
-  Diseases               String?
-  COVID_14Days           Boolean?
-  Emergency_Name         String?
-  Emergency_Number       String?
-  Emergency_Relationship String?
-  Emergency_BloodType    String?
-  Github                 String?
-  Discord                String?
-  Accounts               Accounts[]
-}
-
-model BloodTypes {
-  Id        Int    @id @default(autoincrement())
-  BloodType String
+  id                            Int       @id @default(autoincrement())
+  Name                          String
+  Gender                        String    @db.Char(1)
+  School                        String?
+  DOB                           DateTime?
+  ID_Doc                        String?
+  Number                        String?
+  Facebook                      String?
+  Diet                          String
+  Diseases                      String?
+  COVID_14Days                  Boolean?
+  Emergency_ContactName         String?
+  Emergency_ContactNumber       String?
+  Emergency_ContactRelationship String?
+  Emergency_BloodType           Int?
+  Github                        String?
+  Discord                       String?
+  Account                       Accounts? @relation(fields: [AccountId], references: [id])
+  AccountId                     String?
 }
 
 enum Roles {
   DEVELOPER
   ADMIN
   USER
+}
+
+model BloodTypes {
+  id        Int    @id @default(autoincrement())
+  BloodType String
 }

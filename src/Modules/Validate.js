@@ -29,7 +29,7 @@ function VerifyIntermediate(input) {
         ? RESIDENT_CERTIFICATE_NUMBER_LIST[getCharOrder(input, 1)]
         : parseInt(input[1], intRadix)
     const rest = input
-        .substring(2)
+        .substring(2)   
         .split('')
         .map(n => parseInt(n, intRadix))
     const idInDigits = [firstDigit, secondDigit, ...rest]
