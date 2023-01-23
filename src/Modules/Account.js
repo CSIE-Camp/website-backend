@@ -69,11 +69,9 @@ async function Login(email, password, ip){
     try{
         let PassCmp = await bcrypt.compare(password, Account.Password)
         if (!PassCmp){
-            console.log(`[${ip}] Account: ${email} | Incorrect password !`) //Remove in prod?
             return {status: 400, data: "Incorrect email or password!"}
         }
-        console.log(`[${ip}] Account: ${email} | Logged in successfully!`) //Remove in prod?
-        return {status: 200, data: Account.id}
+        return {status: 200, data: {email: email, id: Account.id}}
     } catch (error){
         console.log(error)
         return {status: 500, data: "Unexpected error occured! Please try again later"} 

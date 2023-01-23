@@ -11,12 +11,17 @@ app.use(express.json())
 
 function EnsureTokenExists(req, res, next){
     let BearerHeader = req.headers["authorization"]
-    if (typeof BearerHeader === "undefiend"){
-        return res.status(403)
+    let token = BearerHeader && BearerHeader.split(" ")[1]
+    if (!token){
+        return res.status(401).json({message: "Token = null?"})
     }
-    let Token = BearerHeader.split(" ")[1]
-    req.token = Token
-    next()
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        if (err){
+            return res.status(403).json({message: "Invalid Auth token"})
+        }
+        req.user = user
+        next()
+    })
 }
 
 app.post("/login", async (req, res) => {
@@ -29,8 +34,9 @@ app.post("/login", async (req, res) => {
             return res.status(status).json({message: data})
         }
         let token = jwt.sign({
-            data: data
-        }, process.env.JWT_SECRET, {algorithm: "HS512" ,expiresIn: "24h"})
+            email: email,
+            id: id
+        }, process.env.JWT_SECRET, {algorithm: "HS512" ,expiresIn: "1h"})
         console.log(`${Email} Logged in successfully!`)
         return res.status(status).json({
             message: "Logged in!",
