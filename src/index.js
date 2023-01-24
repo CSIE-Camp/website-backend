@@ -9,6 +9,14 @@ const app = express()
 app.use(express.urlencoded({extended: true}))
 app.use(express.json())
 
+const login = require("./routes/login")
+const signup = require("./routes/signup")
+const verification = require("./routes/verification")
+
+app.use("/login", login)
+app.use("/signup", signup)
+app.use("/verification", verification)
+
 function EnsureTokenExists(req, res, next){
     let BearerHeader = req.headers["authorization"]
     let token = BearerHeader && BearerHeader.split(" ")[1]
@@ -24,54 +32,8 @@ function EnsureTokenExists(req, res, next){
     })
 }
 
-app.post("/login", async (req, res) => {
-    let Ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-    let Email = req.body.email
-    let Password = req.body.password
-    Account.Login(Email, Password, Ip).then(({ status, data }) => {
-        if (status != 200) {
-            console.log(`Failed: ${data}`)
-            return res.status(status).json({message: data})
-        }
-        let token = jwt.sign({
-            email: email,
-            id: id
-        }, process.env.JWT_SECRET, {algorithm: "HS512" ,expiresIn: "1h"})
-        console.log(`${Email} Logged in successfully!`)
-        return res.status(status).json({
-            message: "Logged in!",
-            token: token
-        })
-    }).catch((error) => {
-        console.log(error)
-        return res.status(500).json({message: "Internal Server Error"})
-    })
-})
-
-app.post("/signup", async (req, res) => {
-    let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-    let email = req.body.email
-    let password = req.body.password
-    let conf_password = req.body.conf_password
-    console.log(`Email: ${email} | Password: ${password} | Conf_Pasword: ${conf_password}`)
-    Account.Signup(email, password, conf_password, ip).then(({status, data}) => {
-        if (status != 200){
-            return res.status(status).json({message: data})
-        }
-        console.log(`${email} : Account created!}`)
-        return res.status(status).json({message: data})
-    }).catch((error) => {
-        console.log(error)
-        return res.status(500).json({message: "Internal server Error"})
-    })
-})
-
 app.post("/api/v1/profile", EnsureTokenExists, async (req, res) => {
 
-})
-
-app.post("/api/v1/verify/:id", async (req, res) => {
-    //email verification
 })
 
 app.listen(process.env.PORT, () => {

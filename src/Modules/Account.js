@@ -8,16 +8,6 @@ const bcrypt = require("bcrypt")
 
 const SaltRounds = 14
 
-const Sha512Regex = /[0-9a-fA-F]{128}$/
-
-function IsString(string){
-    return typeof string === "string" && string !== ""
-}
-
-function IsSha512(string){
-    return Sha512Regex.test(string) && string.length === 128
-}
-
 
 async function Signup(Email, Password, ConfPassword, Ip){
     if (!(IsString(Email) && IsString(Password) && IsString(ConfPassword))){
@@ -51,32 +41,6 @@ async function Signup(Email, Password, ConfPassword, Ip){
     }
 }
 
-async function Login(email, password, ip){
-    if (!(IsString(email) && IsString(password))){
-        return {status: 400, data: "Email or password cannot be null or empty!"}
-    }
-    if (!Validate.ValidateEmail(email)){
-        return {status: 400, data: "Incorrect email or password!"}
-    }
-    if (!IsSha512(password)){
-        return {status: 418, data: "I like green tea to be honest"} //Not a SHA512 string...Skid or Hacker
-    }
-    let Account = await db.FindAccountByEmail(email)
-    if (!Account){
-        console.log("not exit")
-        return {status: 400, data: "Account does not exist!"}
-    }
-    try{
-        let PassCmp = await bcrypt.compare(password, Account.Password)
-        if (!PassCmp){
-            return {status: 400, data: "Incorrect email or password!"}
-        }
-        return {status: 200, data: {email: email, id: Account.id}}
-    } catch (error){
-        console.log(error)
-        return {status: 500, data: "Unexpected error occured! Please try again later"} 
-    }
-}
 
 async function UpdateProfile(){
 
@@ -87,7 +51,6 @@ async function RemoveAccount(Email, Password, ConfPassword, Ip){
 }
 
 module.exports = {
-    Signup: Signup,
-    Login: Login
+    Signup: Signup
 }
 

@@ -2,6 +2,17 @@ const { PrismaClient } = require("@prisma/client")
 
 const prisma = new PrismaClient
 
+async function CreatePendingAccount(Email, Password){
+    let UserRecord = await prisma.pendingAccounts.create({
+        data: {
+            Email: Email,
+            Password: Password
+        }
+    })
+    return UserRecord
+}
+
+
 async function CreateAccount(Email, Password) {
     let UserRecord = await prisma.accounts.create({
         data: {
@@ -76,6 +87,7 @@ async function GetEmergencyInfo(AccountId) {
 
 module.exports = {
     CreateAccount: CreateAccount,
+    CreatePendingAccount: CreatePendingAccount,
     FindAccountByEmail: FindAccountByEmail,
     FindAccountById: FindAccountById,
     GetEmergencyInfo: GetEmergencyInfo,

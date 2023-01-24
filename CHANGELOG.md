@@ -21,10 +21,9 @@
 
  **Fixed**
 
-
 <br/>
 
-### 2023-01-23 23:00pm ###
+### 2023-01-23 23:00 ###
  **Changed**
 
 
@@ -44,3 +43,25 @@
  - Move api handlers to /src/routes
  - Add **Middlewares**
 
+<br/>
+
+### 2023-01-24 22:01 ###
+
+ **Changed**
+ - Started using router and routes now
+ - When a user signs up for an account, they will be added to a pending list instead of the main accounts db
+
+
+ **Added**
+ - Routes
+
+
+ **Removed**
+
+ **Fixed**
+
+ **Planned**
+ - Add **Middlewares**
+ - Finish Email Verification code
+
+<br/>

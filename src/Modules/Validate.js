@@ -1,8 +1,6 @@
-const PhoneRegex = /\(??(0\d{1,2}?)\)??(\s*?|-??)(\d{3,4}(\s*?|-??)\d{3,4})/
 const IDRegex = /^[A-Z][1,2]\d{8}$/
 const NARCRegex = /^[A-Z][8,9]\d{8}$/
 const OARCRegex = /^[A-Z]{2}\d{8}$/
-const EmailRegex =  /.+@.+\..+/
 
 function Zip(a1, a2, f) {
     const length = Math.min(a1.length, a2.length);
@@ -47,22 +45,35 @@ function ValidateARC(arc){
     return (NARCRegex.test(arc) || OARCRegex.test(arc)) && VerifyIntermediate(arc) && typeof arc == "string"
 }
 
-
-function ValidateEmail(email){
-    return EmailRegex.test(email) && typeof email == "string"
-}
-
-function ValidateNumber(number){
+const PhoneRegex = /\(??(0\d{1,2}?)\)??(\s*?|-??)(\d{3,4}(\s*?|-??)\d{3,4})/
+function IsValidNumber (number){
     return PhoneRegex.test(number) && typeof number == "string"
 }
 
-function ValidatePassword(password){
-    
+const EmailRegex =  /.+@.+\..+/
+function IsValidEmail(email){
+    return EmailRegex.test(email) && typeof email == "string"
+}
+
+
+function IsValidEmail(email){
+    return EmailRegex.test(email) && typeof email == "string"
+}
+
+const Sha512Regex = /[0-9a-fA-F]{128}$/
+function IsValidPassword(String){
+    return Sha512Regex.test(String) && String.length === 128
+}
+
+function IsValidString(String){
+    return typeof String === "string" && String.split(" ").join("") != ""
 }
 
 module.exports = {
-    ValidateNumber: ValidateNumber,
-    ValidateEmail: ValidateEmail,
     ValidateARC: ValidateARC,
-    ValidateID: ValidateID
+    ValidateID: ValidateID,
+    IsValidNumber: IsValidNumber,
+    IsValidEmail: IsValidEmail,
+    IsValidPassword: IsValidPassword,
+    IsValidString: IsValidString,
 }
