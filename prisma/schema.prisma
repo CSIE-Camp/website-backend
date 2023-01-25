@@ -7,6 +7,12 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model Tokens {
+  Token     String   @id
+  AccountId String   @unique
+  CreatedAt DateTime @default(now())
+}
+
 model PendingAccounts {
   id        String   @id @default(cuid())
   CreatedAt DateTime @default(now())

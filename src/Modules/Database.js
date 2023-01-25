@@ -12,6 +12,18 @@ async function CreatePendingAccount(Email, Password){
     return UserRecord
 }
 
+async function VerifyPendingAccount(PendingId){
+    let PendingRecord = await prisma.pendingAccounts.findUnique({
+        where: {
+            id: PendingId
+        }
+    })
+    if (!PendingRecord){
+        return false
+    }
+    
+}
+
 
 async function CreateAccount(Email, Password) {
     let UserRecord = await prisma.accounts.create({
@@ -88,6 +100,7 @@ async function GetEmergencyInfo(AccountId) {
 module.exports = {
     CreateAccount: CreateAccount,
     CreatePendingAccount: CreatePendingAccount,
+    VerifyPendingAccount: VerifyPendingAccount,
     FindAccountByEmail: FindAccountByEmail,
     FindAccountById: FindAccountById,
     GetEmergencyInfo: GetEmergencyInfo,

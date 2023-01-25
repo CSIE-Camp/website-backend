@@ -3,14 +3,15 @@ const bcrypt = require("bcrypt")
 
 const { IsValidEmail, IsValidString, IsValidPassword } = require("../Modules/Validate")
 const {CreatePendingAccount, FindAccountByEmail} = require("../Modules/Database")
-const { Signup } = require("../Modules/Account")
 const {timingSafeEqual} = require("crypto")
+
+const {SendVerifyEmail} = require("./../Services/EmailService")
 
 const router = express.Router()
 
 const SaltRounds = 14
 
-async function Signup(email, password, ip){
+async function Signup(email, password, conf_password, ip){
     if (!(IsValidString(email) && IsValidString(password) && IsValidString(conf_password))){
         return {status: 400, data: "Email or password or confirm passowrd cannot be null or empty!"}
     }
@@ -28,11 +29,14 @@ async function Signup(email, password, ip){
     }
     try{
         let hashed = await bcrypt.hash(password, SaltRounds)
-        let status = await CreatePendingAccount(email, hashed)
-        if (!status){
+        let PendingStatus = await CreatePendingAccount(email, hashed)
+        if (!PendingStatus){
             return {status: 500, data: "Internal Server Error"}
         }
-        
+        let VerifyMailStatus = await SendVerifyEmail(email) // Unfinished
+        if (!VerifyMailStatus){
+            return {status: 500, data: "Internal server error! Please contact our staff."}
+        }
         return {status: 200, data: "Please verify your account!"}
     }catch(error){
         console.log(error)

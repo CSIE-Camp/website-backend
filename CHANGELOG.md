@@ -65,3 +65,25 @@
  - Finish Email Verification code
 
 <br/>
+
+### 2023-01-25 21:41 (Maxx) ###
+
+ **Changed**
+ - Made index page a route
+
+ **Added**
+ - new 404 error handler
+
+
+ **Removed**
+
+ **Fixed**
+ - Faulty SignUp function in src/routes/signup.js 
+ 
+
+ **Planned**
+ - Finish verification middleware
+ - Add refresh token
+ - Finish nodemailer (dunno why it isnt working)
+
+<br/>

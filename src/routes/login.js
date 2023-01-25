@@ -1,4 +1,5 @@
-require("dotenv").config()
+const dotenv = require("dotenv")
+dotenv.config()
 const bcrypt = require("bcrypt")
 const express = require("express")
 const jwt = require("jsonwebtoken")
@@ -35,7 +36,7 @@ async function Login(email, password, ip){
 }
 
 router.post("/", async (req, res) => {
-    let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
+    let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddressw
     let email = req.body.email
     let password = req.body.password
     Login(email, password, ip).then(({status, data}) => {
