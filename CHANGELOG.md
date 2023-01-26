@@ -116,4 +116,15 @@
 
  **Planned**
 
-<br/>
+---
+
+### 2023-01-27 03:14 (JacobLinCool) ###
+
+ **Changed**
+
+- Remove API docs from README.md
+
+ **Added**
+
+- Add setup instructions to README.md
+- Default `PORT` is now 8080
