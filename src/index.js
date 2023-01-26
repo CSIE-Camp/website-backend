@@ -32,21 +32,6 @@ app.use((req, res, next) => {
 hi, please put the send email code in ./Modules/EmailService, thanks
 */
 
-function EnsureTokenExists(req, res, next){
-    let BearerHeader = req.headers["authorization"]
-    let token = BearerHeader && BearerHeader.split(" ")[1]
-    if (!token){
-        return res.status(401).json({message: "Token = null?"})
-    }
-    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-        if (err){
-            return res.status(403).json({message: "Invalid Auth token"})
-        }
-        req.user = user
-        next()
-    })
-}
-
 app.listen(process.env.PORT, () => {
     console.log(`Listening on Port ${process.env.PORT}`)
 })

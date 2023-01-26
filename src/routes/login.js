@@ -57,4 +57,8 @@ router.post("/", async (req, res) => {
     })
 })
 
+router.delete("/", async (req, res) => { //logging out
+
+})
+
 module.exports = router

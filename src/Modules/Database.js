@@ -21,7 +21,17 @@ async function VerifyPendingAccount(PendingId){
     if (!PendingRecord){
         return false
     }
-    
+    let UserRecord = await prisma.accounts.create({
+        data: {
+            Email: PendingRecord.Email,
+            Password: PendingRecord.Password,
+            CreatedAt: PendingRecord.CreatedAt
+        }
+    })
+    await prisma.pendingAccounts.delete({
+        where: {id: PendingId}
+    })
+    return UserRecord
 }
 
 

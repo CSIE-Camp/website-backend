@@ -73,7 +73,7 @@
 
  **Added**
  - new 404 error handler
-
+ - new DB table to store refresh tokens
 
  **Removed**
 
@@ -85,5 +85,21 @@
  - Finish verification middleware
  - Add refresh token
  - Finish nodemailer (dunno why it isnt working)
+
+<br/>
+
+### 2023-01-26 14:38 (Maxx) ###
+
+ **Changed**
+
+ **Added**
+ - Email verification method 
+ - New db queries (VerifyPendingAccount)
+ **Removed**
+
+ **Fixed**
+
+ **Planned**
+ - Sending emails from nodemailer (gmail disabled Less Secure Apps)
 
 <br/>
