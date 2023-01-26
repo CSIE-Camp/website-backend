@@ -103,3 +103,17 @@
  - Sending emails from nodemailer (gmail disabled Less Secure Apps)
 
 <br/>
+
+### 2023-01-27 1:42 (Takala) ###
+
+ **Changed**
+
+ **Added**
+- login and register API docs
+ **Removed**
+
+ **Fixed**
+
+ **Planned**
+
+<br/>
