@@ -1,6 +1,4 @@
-const dotenv = require("dotenv")
-dotenv.config()
-const Account = require("./Modules/Account")
+const { PORT } = require("./config");
 
 const express = require("express")
 const swaggerUi = require('swagger-ui-express')
@@ -35,9 +33,9 @@ app.use((req, res, next) => {
 hi, please put the send email code in ./Modules/EmailService, thanks
 */
 
-app.listen(process.env.PORT, () => {
-    console.log(`Listening on Port ${process.env.PORT}`)
-})
+app.listen(PORT, () => {
+    console.log(`Listening on Port ${PORT}`);
+});
 
 /*
 Create account flow:
