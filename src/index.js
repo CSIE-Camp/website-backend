@@ -3,7 +3,8 @@ dotenv.config()
 const Account = require("./Modules/Account")
 
 const express = require("express")
-const jwt = require("jsonwebtoken")
+const swaggerUi = require('swagger-ui-express')
+const yaml = require('yamljs')
 
 const app = express()
 
@@ -14,11 +15,13 @@ const index = require("./routes/index")
 const login = require("./routes/login")
 const signup = require("./routes/signup")
 const verification = require("./routes/verification")
+const swaggerDocument = yaml.load('spec.yaml')
 
 app.use("/", index)
 app.use("/login", login)
 app.use("/signup", signup)
 app.use("/verification", verification)
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 //404 error
 app.use((req, res, next) => {

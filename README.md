@@ -15,6 +15,9 @@ We should ensure that our users' data and our server is as safe as possible.
 
 <br/>
 
+### API Docs
+Using `https://localhost:${process.env.PORT}/api/docs/` to see the api docments. API referenced from [Unicourse API Spec](https://github.com/UniCourse-TW/API-Spec/blob/main/spec.yaml).
+
 ### **Signing up** ###
 
 In order to successfully create an account for the user, you must collect the following data from the user.
