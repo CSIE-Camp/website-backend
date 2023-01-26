@@ -16,7 +16,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: "#/components/schemas/loginPayload"
+                            $ref: "#/components/schemas/RegisterPayload"
             responses:
                 "200":
                     description: Always 200
@@ -33,7 +33,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: "#/components/schemas/RegisterPayload"
+                            $ref: "#/components/schemas/loginPayload"
             responses:
                 "200":
                     description: Always 200
