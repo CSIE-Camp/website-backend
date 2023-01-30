@@ -164,3 +164,17 @@
 
 **Removed**
 - conf_password from the signup function
+
+
+
+### 2023-01-27 03:29 (Maxx) ###
+
+ **Changed**
+ - New branch: Maxx
+
+**Added**
+ - Profile route
+ - File uploads
+ 
+**Removed**
+
