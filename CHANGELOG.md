@@ -103,3 +103,66 @@
  - Sending emails from nodemailer (gmail disabled Less Secure Apps)
 
 <br/>
+
+### 2023-01-26 21:35 (Maxx) ###
+
+ **Changed**
+
+ **Added**
+ - CORS
+ 
+ **Removed**
+
+ **Fixed**
+
+ **Planned**
+ - Sending emails from nodemailer (gmail disabled Less Secure Apps)
+
+<br/>
+
+### 2023-01-27 1:42 (Takala) ###
+
+ **Changed**
+
+ **Added**
+- login and register API docs
+ **Removed**
+
+ **Fixed**
+
+ **Planned**
+
+
+---
+
+### 2023-01-27 03:14 (JacobLinCool) ###
+
+ **Changed**
+
+- Remove API docs from README.md
+
+ **Added**
+
+- Add setup instructions to README.md
+- Default `PORT` is now 8080
+
+
+### 2023-01-27 03:29 (Maxx) ###
+
+ **Changed**
+
+- Removed conf_password from the signup function
+
+
+### 2023-01-27 03:29 (Maxx) ###
+
+ **Changed**
+
+**Added**
+- Added index.html for testing file uploads
+- Multer for file uploads
+- /profile/uploads now accepts 1 image file (PNG / JPG / JPEG)
+
+**Removed**
+- conf_password from the signup function
+
