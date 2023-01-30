@@ -132,7 +132,6 @@
 
  **Planned**
 
-
 ---
 
 ### 2023-01-27 03:14 (JacobLinCool) ###
@@ -165,4 +164,3 @@
 
 **Removed**
 - conf_password from the signup function
-

@@ -1,0 +1,130 @@
+openapi: 3.0.0
+info:
+    title: NTNU CSIE Camp API
+    description: NTNU CSIE Camp API
+    version: "1.0.0"
+servers:
+    - url: https://server.com
+        description: SwaggerHub API Auto Mocking
+paths:
+    /register:
+        post:
+            summary: 註冊
+            description: 註冊
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/RegisterPayload"
+            responses:
+                "200":
+                    description: Always 200
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AuthResponse"
+    /login:
+        post:
+            summary: 登入
+            description: 登入
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/loginPayload"
+            responses:
+                "200":
+                    description: Always 200
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/AuthResponse"
+
+components:
+    securitySchemes:
+        bearer:
+            type: http
+            scheme: bearer
+            bearerFormat: JWT
+    schemas:
+        Response:
+            properties:
+                success:
+                    title: Response.success
+                    description: 操作成功？
+                    type: boolean
+                data:
+                    title: Response.data
+                    description: 資料，如果有
+                    type: object
+                err:
+                    properties:
+                        title:
+                            title: Response.err.title
+                            type: string
+                        message:
+                            title: Response.err.message
+                            type: string
+                    required:
+                        - title
+                        - message
+                    additionalProperties: false
+                    title: Response.err
+                    description: 失敗，錯誤資訊
+                    type: object
+                token:
+                    title: Response.token
+                    description: 如果該操作會影響使用者包含在 JWT 內的狀態，則需核發新的 JWT，或用於續簽
+                    type: string
+            required:
+                - success
+            additionalProperties: false
+            title: Response
+            description: API Response
+            type: object
+        RegisterPayload:
+            properties:
+                email:
+                    title: RegisterPayload.email
+                    description: 使用者電子郵件
+                    type: string
+                password:
+                    title: RegisterPayload.password
+                    description: 使用者密碼
+                    type: string
+                comfirmPassword:
+                    title: RegisterPayload.comfirmPassword
+                    description: 確認使用者密碼
+                    type: string
+            required:
+                - email
+                - password
+                - comfirmPassword
+            additionalProperties: false
+            title: RegisterPayload
+            type: object
+        loginPayload:
+            properties:
+                email:
+                    title: loginPayload.email
+                    description: 使用者電子郵件
+                    type: string
+                password:
+                    title: loginPayload.password
+                    description: 使用者密碼
+                    type: string
+            required:
+                - email
+                - password
+            additionalProperties: false
+            title: LoginPayload
+            type: object
+        AuthResponse:
+            allOf:
+                - $ref: "#/components/schemas/Response"
+            additionalProperties: false
+            title: AuthResponse
+            type: object
+            
