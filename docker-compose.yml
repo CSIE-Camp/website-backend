@@ -1,18 +1,20 @@
 version: '3'
 volumes:
-  prisma_db: 
+  db-data:
 
 services:
-  web:
+  server:
     build: .
     ports: 
       - "8080:8080"
-    container_name: web
+    container_name: server
   db:
-    image: astronomerinc/ap-prisma
-    restart: always
+    image: postgres:latest
+    restart: unless-stopped
     container_name: db
-    ports:
+    env_file:
+      - .env
+    expose:
       - 8180:8080
     volumes:
-      - prisma_db:/data/db 
+      - db-data:/var/lib/postgresql/data
