@@ -1,0 +1,18 @@
+version: '3'
+volumes:
+  prisma_db: 
+
+services:
+  web:
+    build: .
+    ports: 
+      - "8080:8080"
+    container_name: web
+  db:
+    image: astronomerinc/ap-prisma
+    restart: always
+    container_name: db
+    ports:
+      - 8180:8080
+    volumes:
+      - prisma_db:/data/db 
