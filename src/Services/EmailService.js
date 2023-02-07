@@ -29,17 +29,14 @@ async function SendVerifyEmail(email, id){
 	transporter.sendMail(mailOptions)
 }
 
-async function SendLoginEmail(email,id){
-	router.get('/',async(req,res)=>{
-		let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddressw
-		var mailOptions = {
-			from:'gmail',
-			to:`${email}`,
-			subject:'師大資工營登入通知',
-			text:`您已在 ${ip} 登入了`,
-		}
-		transporter.sendMail(mailOptions)
+async function SendLoginEmail(email,ip){
+	var mailOptions = {
+		from:'gmail',
+		to:`${email}`,
+		subject:'師大資工營登入通知',
+		text:`您已在 ${ip} 登入了`,
 	}
+	transporter.sendMail(mailOptions)
 }
 module.exports = {
     SendVerifyEmail: SendVerifyEmail,
