@@ -5,15 +5,13 @@ const jwt = require("jsonwebtoken")
 const mailer = require("nodemailer")
 
 var transporter = nodemailer.createTransport({
-    service: 'Gmail',
+	host:'smtp.mailservice.com',
     secureConnection: true, 
-    auth: {
-        user: 'Gmail帳號',
-        pass: 'Gmail密碼' 
-    },
-    tls: {
-        rejectUnauthorized: false
-    }
+	port:process.env.PORT,
+	auth: {
+    	user: mail,
+    	pass: pass,
+  	},
 });
 
 
