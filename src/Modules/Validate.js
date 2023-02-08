@@ -37,12 +37,20 @@ function VerifyIntermediate(input) {
 }
 
 
-function ValidateID(id){
+function ValidateID(id){D
     return IDRegex.test(id) && VerifyIntermediate(id) && typeof id == "string"
 }
 
 function ValidateARC(arc){
-    return (NARCRegex.test(arc) || OARCRegex.test(arc)) && VerifyIntermediate(arc) && typeof arc == "string"
+    if (typeof arc !== "string" || !VerifyIntermediate(arc)){
+        return
+    }
+    if (NARCRegex.test(arc)){
+        return "New_ARC"
+    }
+    if (OARCRegex.test(arc)){
+        return "Old_ARC"
+    }
 }
 
 const PhoneRegex = /\(??(0\d{1,2}?)\)??(\s*?|-??)(\d{3,4}(\s*?|-??)\d{3,4})/

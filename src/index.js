@@ -18,6 +18,7 @@ const profile = require("./routes/profile")
 const verification = require("./routes/verification");
 const swaggerDocument = yaml.load('spec.yaml')
 
+
 app.get("/", (req, res) => {
     return res.sendFile(path.join(__dirname, "index.html"))
 })

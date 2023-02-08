@@ -1,8 +1,9 @@
+const { AuthenticateAccessToken } = require("./../Middleware/AuthenticateToken")
+const {} = require("./../Modules/Database")
 const express = require("express")
 const crypto = require("crypto")
 const multer = require("multer")
 const path = require("path")
-const { resolveSoa } = require("dns")
 
 const router = express.Router()
 
@@ -29,9 +30,9 @@ const upload = multer({
     }
 })
 
-router.post("/update", upload.single("image"), (req, res) => {
-    console.log(req.file)
-    return res.status(200)
+router.post("/update", AuthenticateAccessToken,upload.single("image"), async (req, res) => {
+    
+    return res.status(200).json({message: "File uploaded!"})
 })
 
 module.exports = router

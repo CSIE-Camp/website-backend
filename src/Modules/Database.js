@@ -2,7 +2,7 @@ const { PrismaClient } = require("@prisma/client")
 
 const prisma = new PrismaClient
 
-async function CreatePendingAccount(Email, Password){
+async function CreatePendingAccount(Email, Password) {
     let UserRecord = await prisma.pendingAccounts.create({
         data: {
             Email: Email,
@@ -12,13 +12,13 @@ async function CreatePendingAccount(Email, Password){
     return UserRecord
 }
 
-async function VerifyPendingAccount(PendingId){
+async function VerifyPendingAccount(PendingId) {
     let PendingRecord = await prisma.pendingAccounts.findUnique({
         where: {
             id: PendingId
         }
     })
-    if (!PendingRecord){
+    if (!PendingRecord) {
         return false
     }
     let UserRecord = await prisma.accounts.create({
@@ -29,7 +29,7 @@ async function VerifyPendingAccount(PendingId){
         }
     })
     await prisma.pendingAccounts.delete({
-        where: {id: PendingId}
+        where: { id: PendingId }
     })
     return UserRecord
 }
@@ -64,6 +64,14 @@ async function FindAccountByEmail(Email) {
     return Account
 }
 
+async function FindPendingAccountByEmail(Email) {
+    let Account = await prisma.pendingAccounts.findUnique({
+        where: {
+            Email: Email
+        }
+    })
+    return (Account ? true : false)
+}
 
 async function FindAccountById(AccountId) {
     let Account = await prisma.accounts.findUnique({
@@ -107,11 +115,49 @@ async function GetEmergencyInfo(AccountId) {
     return EmergencyData
 }
 
+/*
+async function CreateAccount(Email, Password) {
+    let UserRecord = await prisma.accounts.create({
+        data: {
+            Email: Email,
+            Password: Password
+        }
+    })
+    return UserRecord
+}
+*/
+
+async function CreateProfile(AccountId, data) {
+    let ProfileData = await prisma.profiles.create({
+        data: {
+            Name: data.Name,
+            Gender: data.Gender,
+            School: data.School,
+            DOB: data.DOB,
+            ID_DOC: data.ID
+        }
+    })
+}
+
+async function FindProfile(AccountId) {
+
+}
+
+async function UpdateProfile(AccountId) {
+
+}
+
+async function DeleteProfile(AccountId) {
+
+}
+
+
 module.exports = {
     CreateAccount: CreateAccount,
     CreatePendingAccount: CreatePendingAccount,
     VerifyPendingAccount: VerifyPendingAccount,
     FindAccountByEmail: FindAccountByEmail,
+    FindPendingAccountByEmail: FindPendingAccountByEmail,
     FindAccountById: FindAccountById,
     GetEmergencyInfo: GetEmergencyInfo,
 }

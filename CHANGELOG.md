@@ -178,3 +178,17 @@
  
 **Removed**
 
+
+### 2023-02-8 12:40 (Maxx) ###
+ 
+ **Added**
+ - "Token.js", a module responsible for handling tokens
+ - logout function
+ - refresh tokens
+ - redis
+ - Middlewares for authenticating tokens
+
+ **Changed**
+ - Removed jwt token signing from login.js
+ 
+**Removed**
