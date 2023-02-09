@@ -179,7 +179,7 @@
 **Removed**
 
 
-### 2023-02-8 12:40 (Maxx) ###
+### 2023-02-08 12:40 (Maxx) ###
  
  **Added**
  - "Token.js", a module responsible for handling tokens
@@ -192,3 +192,24 @@
  - Removed jwt token signing from login.js
  
 **Removed**
+
+
+### 2023-02-09 16:02 (Maxx) ###
+ 
+ **Added**
+ - Rewrote VeirfyPendingAccount method
+ - Made ARC validation distinguish new and old ARC
+ - Reset password with link verification (verification part)
+ - Email verification (verification part)
+ - Added default role to accounts (Forgot the @default() tag) 
+ - Getting profile
+ - Updating profile (In progress)
+ - New DB Queries for FindProfile, UpdateProfile
+ - Added IsValidFacebookUrl and IsValidBloodType to Validation
+ - Started adding a bunch of type checking to Update profile
+
+ **Changed**
+ - Rewrote email verification method
+ 
+**Removed**
+- Will to live

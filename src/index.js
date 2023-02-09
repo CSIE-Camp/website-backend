@@ -18,7 +18,6 @@ const profile = require("./routes/profile")
 const verification = require("./routes/verification");
 const swaggerDocument = yaml.load('spec.yaml')
 
-
 app.get("/", (req, res) => {
     return res.sendFile(path.join(__dirname, "index.html"))
 })
@@ -31,10 +30,10 @@ app.use("/verification", verification)
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 //404 error
-app.use((req, res, next) => {
+app.get("*", (req, res) => {
     let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-    console.log("404 Not found!")
-    return res.status(404).send("URL not found")
+    console.log(ip)
+    return res.status(404).send("URL not found!")
 })
 
 

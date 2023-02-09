@@ -29,12 +29,11 @@ async function Signup(email, password, conf_password, ip) {
     }
     try {
         let hashed = await bcrypt.hash(password, SaltRounds)
-        console.log(email, hashed)
-        let PendingStatus = await CreatePendingAccount(email, hashed)
-        if (!PendingStatus) {
+        let PendingAccount = await CreatePendingAccount(email, hashed)
+        if (!PendingAccount) {
             return { status: 500, data: "Internal Server Error" }
         }
-        let VerifyMailStatus = await SendVerifyEmail(email) // Unfinished
+        let VerifyMailStatus = await SendVerifyEmail(email, PendingAccount.id) // Unfinished
         if (!VerifyMailStatus) {
             return { status: 500, data: "Internal server error! Please contact our staff." }
         }

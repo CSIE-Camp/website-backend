@@ -1,5 +1,4 @@
-const { ACCESS_TOKEN_EXPIRE, ACCESS_TOKEN_SECRET, REFRESH_TOKEN_EXPIRE, REFRESH_TOKEN_SECRET, EMAIL_TOKEN_SECRET, EMAIL_TOKEN_EXPIRE, MAX_REFRESH_TOKENS } = require("./../config")
-
+const { ACCESS_TOKEN_EXPIRE, ACCESS_TOKEN_SECRET, REFRESH_TOKEN_EXPIRE, REFRESH_TOKEN_SECRET, EMAIL_TOKEN_SECRET, EMAIL_TOKEN_EXPIRE, MAX_REFRESH_TOKENS, RESET_PASSWORD_SECRET, RESET_PASSWORD_EXPIRE } = require("./../config")
 
 const { randomBytes, randomUUID } = require("crypto")
 const jwt = require("jsonwebtoken")
@@ -8,6 +7,11 @@ const redis = require("redis")
 
 const RedisClient = redis.createClient()
 
+async function CheckRedisConnection(){
+    if (!RedisClient.isOpen){
+        return RedisClient.connect()
+    }
+}
 
 async function GenerateAccessToken(userid, ip) {
     let token = jwt.sign(
@@ -26,10 +30,10 @@ async function GenerateAccessToken(userid, ip) {
     return token
 }
 
-async function GenerateEmailToken(email, id) {
+async function GenerateEmailToken(id) {
     let token = jwt.sign(
         {
-            Id: id
+            UserId: id
         },
         EMAIL_TOKEN_SECRET,
         {
@@ -40,27 +44,28 @@ async function GenerateEmailToken(email, id) {
     return token
 }
 
+async function GeneratePasswordResetToken(userid) {
+    let token = jwt.sign(
+        {
+            _id: userid
+        },
+        RESET_PASSWORD_SECRET,
+        {
+            algorithm: "HS512",
+            expiresIn: RESET_PASSWORD_EXPIRE
+        }
+    )
+    return token
+}
+
 async function GetRefreshTokens(userid) {
-    if (!RedisClient.isOpen) {
-        await RedisClient.connect()
-    }
+    await CheckRedisConnection()
     let tokens = await RedisClient.hGet("refresh_tokens", userid)
     if (tokens) {
         return JSON.parse(tokens)
     }
     return {}
 }
-
-/*
-let NewToken = {
-    TokenId: {
-        Token: token,
-        CreatedAt: Date.now(),
-        Ip: ip
-    }
-}
-*/
-
 
 async function GetOldestToken(tokens) {
     let OldestTime = [Date.now(), null]
@@ -75,12 +80,10 @@ async function GetOldestToken(tokens) {
 }
 
 async function GenerateRefreshToken(userid, ip) {
-    if (!RedisClient.isOpen) {
-        await RedisClient.connect()
-    }
+    await CheckRedisConnection()
     let tokens = await GetRefreshTokens(userid)
     if (Object.keys(tokens).length >= MAX_REFRESH_TOKENS) {
-        delete(tokens[await GetOldestToken(tokens)])
+        delete (tokens[await GetOldestToken(tokens)])
     }
     let TokenId = randomUUID()
 
@@ -109,9 +112,7 @@ async function GenerateRefreshToken(userid, ip) {
 }
 
 async function RevokeRefreshToken(UserId, uuid) {
-    if (!RedisClient.isOpen) {
-        await RedisClient.connect()
-    }
+    await CheckRedisConnection()
     let tokens = await GetRefreshTokens(UserId)
     if (tokens[uuid]) {
         delete (tokens[uuid])
@@ -128,5 +129,6 @@ module.exports = {
     GenerateAccessToken: GenerateAccessToken,
     GenerateEmailToken: GenerateEmailToken,
     GenerateRefreshToken: GenerateRefreshToken,
+    GeneratePasswordResetToken: GeneratePasswordResetToken,
     RevokeRefreshToken: RevokeRefreshToken
 }

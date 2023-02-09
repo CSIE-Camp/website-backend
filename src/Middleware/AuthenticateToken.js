@@ -10,7 +10,7 @@ function AuthenticateAccessToken(req, res, next){
         if (err){
             return res.status(403).json({message: "Invalid token!"})
         }
-        req.userid = decoded.id
+        req.userid = decoded.UserId
         next()
     })
 }

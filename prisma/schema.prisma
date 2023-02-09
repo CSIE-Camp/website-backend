@@ -31,7 +31,7 @@ model Accounts {
   VerifiedAt     DateTime         @default(now())
   Email          String           @unique
   Password       String
-  Profiles       Profiles[]
+  Role           Roles            @default(USER)
   PaymentDetails PaymentDetails[]
   Logs           Logs[]
 }
@@ -39,25 +39,24 @@ model Accounts {
 //Accounts and Profile should have a 1-1 relationship
 model Profiles {
   id                            Int       @id @default(autoincrement())
-  Name                          String
-  Gender                        String    @db.Char(1)
+  Name                          String?
+  Gender                        String?
   School                        String?
   DOB                           DateTime?
   Validated_ID                  String?
   Unvalidate_ID                 String?
   Number                        String?
   Facebook                      String?
-  Diet                          String
+  Diet                          String?
   Diseases                      String?
-  COVID_14Days                  Boolean?
+  COVID_14Days                  Boolean @default(false)
   Emergency_ContactName         String?
   Emergency_ContactNumber       String?
   Emergency_ContactRelationship String?
-  Emergency_BloodType           Int?
+  Emergency_BloodType           String?
   Github                        String?
   Discord                       String?
-  Account                       Accounts? @relation(fields: [AccountId], references: [id])
-  AccountId                     String?
+  AccountId                     String    @unique
 }
 
 model PaymentDetails {
@@ -82,9 +81,4 @@ enum Roles {
   DEVELOPER
   ADMIN
   USER
-}
-
-model BloodTypes {
-  id        Int    @id @default(autoincrement())
-  BloodType String
 }
