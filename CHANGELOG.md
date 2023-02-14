@@ -213,3 +213,9 @@
  
 **Removed**
 - Will to live
+
+
+### 2023-02-14 17:10 (Maxx) ###
+ 
+ **Added**
+ - ESLint
