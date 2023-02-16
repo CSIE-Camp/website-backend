@@ -7,6 +7,11 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model CampStatus {
+  id             Int       @id @default(1)
+  Apply_Deadline DateTime?
+}
+
 model Tokens {
   Token     String   @id
   AccountId String   @unique
@@ -21,44 +26,59 @@ model PendingAccounts {
 }
 
 model Accounts {
-  id         String     @id @default(cuid())
-  CreatedAt  DateTime
-  VerifiedAt DateTime   @default(now())
-  Email      String     @unique
-  Password   String
-  Profiles   Profiles[]
+  id             String           @id @default(cuid())
+  CreatedAt      DateTime
+  VerifiedAt     DateTime         @default(now())
+  Email          String           @unique
+  Password       String
+  Role           Roles            @default(USER)
+  PaymentDetails PaymentDetails[]
+  Logs           Logs[]
 }
 
 //Accounts and Profile should have a 1-1 relationship
 model Profiles {
   id                            Int       @id @default(autoincrement())
-  Name                          String
-  Gender                        String    @db.Char(1)
+  Name                          String?
+  Gender                        String?
   School                        String?
   DOB                           DateTime?
-  ID_Doc                        String?
+  Validated_ID                  String?
+  Unvalidate_ID                 String?
   Number                        String?
   Facebook                      String?
-  Diet                          String
+  Diet                          String?
   Diseases                      String?
-  COVID_14Days                  Boolean?
+  COVID_14Days                  Boolean @default(false)
   Emergency_ContactName         String?
   Emergency_ContactNumber       String?
   Emergency_ContactRelationship String?
-  Emergency_BloodType           Int?
+  Emergency_BloodType           String?
   Github                        String?
   Discord                       String?
-  Account                       Accounts? @relation(fields: [AccountId], references: [id])
-  AccountId                     String?
+  AccountId                     String    @unique
+}
+
+model PaymentDetails {
+  id                  Int       @id @default(autoincrement())
+  TransferDate        DateTime
+  AccountName         String
+  Account_Last5Digits String
+  Account             Accounts? @relation(fields: [AccountId], references: [id])
+  AccountId           String?
+}
+
+model Logs {
+  id         Int       @id @default(autoincrement())
+  ActionType String
+  Accounts   Accounts? @relation(fields: [AccountId], references: [id])
+  AccountId  String?
+  Details    String
+  TimeStamp  DateTime  @default(now())
 }
 
 enum Roles {
   DEVELOPER
   ADMIN
   USER
-}
-
-model BloodTypes {
-  id        Int    @id @default(autoincrement())
-  BloodType String
 }
