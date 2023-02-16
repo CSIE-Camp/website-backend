@@ -7,7 +7,7 @@ servers:
     - url: https://server.com
         description: SwaggerHub API Auto Mocking
 paths:
-    /register:
+    /signup:
         post:
             summary: 註冊
             description: 註冊
@@ -41,6 +41,15 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/AuthResponse"
+    /profile/update:
+        post:
+
+    
+    /profile:
+        get:
+
+    /verification:
+        get:
 
 components:
     securitySchemes:
@@ -93,10 +102,6 @@ components:
                 password:
                     title: RegisterPayload.password
                     description: 使用者密碼
-                    type: string
-                comfirmPassword:
-                    title: RegisterPayload.comfirmPassword
-                    description: 確認使用者密碼
                     type: string
             required:
                 - email
