@@ -24,6 +24,8 @@
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
+    "eslint": "^8.34.0",
+    "eslint-plugin-react": "^7.32.2",
     "prisma": "^4.9.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^4.6.0"
