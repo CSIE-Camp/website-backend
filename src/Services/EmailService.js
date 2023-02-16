@@ -16,7 +16,6 @@ var transporter = nodemailer.createTransport({
 	},
 });
 
-
 async function SendVerifyEmail(email, id){
 	let token = jwt.sign({
 		id: id,
