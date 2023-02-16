@@ -1,4 +1,21 @@
-const { GenerateEmailToken } = require("./../Modules/Tokens")
+const dotenv = require("dotenv")
+dotenv.config()
+
+const jwt = require("jsonwebtoken")
+const nodemailer = require("nodemailer")
+
+var transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    secureConnection: true, 
+    auth: {
+        user: 'Gmail帳號',
+        pass: 'Gmail密碼' 
+    },
+    tls: {
+        rejectUnauthorized: false
+    }
+});
+
 
 async function SendVerifyEmail(email, id){
     let token = await GenerateEmailToken(id)
