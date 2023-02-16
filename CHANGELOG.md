@@ -165,3 +165,58 @@
 **Removed**
 - conf_password from the signup function
 
+
+
+
+### 2023-01-27 03:29 (Maxx) ###
+
+ **Changed**
+ - New branch: Maxx
+
+**Added**
+ - Profile route
+ - File uploads
+ 
+**Removed**
+
+
+### 2023-02-08 12:40 (Maxx) ###
+ 
+ **Added**
+ - "Token.js", a module responsible for handling tokens
+ - logout function
+ - refresh tokens
+ - redis
+ - Middlewares for authenticating tokens
+
+ **Changed**
+ - Removed jwt token signing from login.js
+ 
+**Removed**
+
+
+### 2023-02-09 16:02 (Maxx) ###
+ 
+ **Added**
+ - Rewrote VeirfyPendingAccount method
+ - Made ARC validation distinguish new and old ARC
+ - Reset password with link verification (verification part)
+ - Email verification (verification part)
+ - Added default role to accounts (Forgot the @default() tag) 
+ - Getting profile
+ - Updating profile (In progress)
+ - New DB Queries for FindProfile, UpdateProfile
+ - Added IsValidFacebookUrl and IsValidBloodType to Validation
+ - Started adding a bunch of type checking to Update profile
+
+ **Changed**
+ - Rewrote email verification method
+ 
+**Removed**
+- Will to live
+
+
+### 2023-02-14 17:10 (Maxx) ###
+ 
+ **Added**
+ - ESLint
