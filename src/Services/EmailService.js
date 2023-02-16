@@ -1,17 +1,20 @@
-const dotenv = require("dotenv")
-dotenv.config()
-
-const jwt = require("jsonwebtoken")
-const mailer = require("nodemailer")
+const { GenerateEmailToken } = require("./../Modules/Tokens")
 
 async function SendVerifyEmail(email, id){
-    let token = jwt.sign({
-        id: id
-    }, process.env.JWT_EMAIL_SECRET, {algorithm: "HS512", expiresIn: "15m"})
-    //send token to given email
-    //dunno why but even the test account doesnt want to work 
+    let token = await GenerateEmailToken(id)
+    //CLIENT_URL/verification/email/${token}
+    console.log(token)
+    return true
+}
+
+async function SendPasswordResetEmail(email, UserId, ip){
+    let token = await GeneratePasswordResetToken(UserId)
+    //CLIENT_URL/login/password-reset/${token}
+    console.log(token)
+    return true
 }
 
 module.exports = {
-    SendVerifyEmail: SendVerifyEmail
+    SendVerifyEmail: SendVerifyEmail,
+    SendPasswordResetEmail: SendPasswordResetEmail
 }
