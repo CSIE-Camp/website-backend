@@ -10,6 +10,7 @@ async function SendVerifyEmail(email, id){
 async function SendPasswordResetEmail(email, UserId, ip){
     let token = await GeneratePasswordResetToken(UserId)
     //CLIENT_URL/login/password-reset/${token}
+    //send email 
     console.log(token)
     return true
 }
