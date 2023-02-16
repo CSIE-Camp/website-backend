@@ -2,7 +2,7 @@ const dotenv = require("dotenv")
 dotenv.config()
 
 const jwt = require("jsonwebtoken")
-const mailer = require("nodemailer")
+const nodemailer = require("nodemailer")
 
 var transporter = nodemailer.createTransport({
     service: 'Gmail',
