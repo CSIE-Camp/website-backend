@@ -164,3 +164,4 @@
 
 **Removed**
 - conf_password from the signup function
+
