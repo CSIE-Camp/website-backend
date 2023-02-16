@@ -2,7 +2,8 @@
     "env": {
         "browser": true,
         "commonjs": true,
-        "es2021": true
+        "es2021": true,
+        "node": true
     },
     "extends": [
         "eslint:recommended",
@@ -17,10 +18,11 @@
         "react"
     ],
     "rules": {
-        "max-len": ["error", { "code": 100 }],
+        "max-len": ["error", { "code": 120 }],
         "quotes": ["error", "double"],
         "semi": ["error", "always"],
         "indent": ["error", "tab"],
         "comma-dangle": ["error", "always-multiline"],
+        "no-unused-vars": ["off"]
     }
 }
