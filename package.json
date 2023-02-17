@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon src/index.js",
-    "server": "node src/index.js"
+    "server": "node src/index.js",
+    "lint": "eslint src/index.js"
   },
   "author": "Maxx",
   "license": "ISC",
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "eslint": "^8.34.0",
+    "pre-commit": "^1.2.2",
     "prisma": "^4.9.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^4.6.0"
