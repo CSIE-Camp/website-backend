@@ -11,7 +11,7 @@ module.exports = {
 		"ecmaVersion": "latest",
 	},
 	"rules": {
-		"max-len": ["error", { "code": 120 }],
+		"max-len": ["error", { "code": 150 }],
 		"quotes": ["error", "double"],
 		"semi": ["error", "always"],
 		"indent": ["error", "tab"],
