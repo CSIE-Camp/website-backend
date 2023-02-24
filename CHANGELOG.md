@@ -220,3 +220,18 @@
  
  **Added**
  - ESLint
+
+### 2023-02-25 05:51 (Maxx) ###
+ **Added**
+ - New Email Service (Thanks to [@Alphabeee](https://github.com/Alphabeee) and [@JacobLinCool](https://github.com/JacobLinCool))
+ - RevokeAllRefreshToken in Tokens.js
+ - GetAccountId in Database.js
+
+ **Changed**
+ - Rewrote bits of the API Document
+ - Signup now splits into /signup/email and /signup/password
+ - Database schema
+
+ **Removed**
+ - Old deprecated Accounts.js
+ - Unused functions in Signup

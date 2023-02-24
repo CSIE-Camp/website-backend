@@ -8,8 +8,10 @@ generator client {
 }
 
 model CampStatus {
-  id             Int       @id @default(1)
-  Apply_Deadline DateTime?
+  id                Int       @id @default(1)
+  Apply_Deadline    DateTime?
+  AllowRegistration Boolean   @default(false)
+  AllowStatusLookup Boolean   @default(false)
 }
 
 model Tokens {
@@ -18,20 +20,14 @@ model Tokens {
   CreatedAt DateTime @default(now())
 }
 
-model PendingAccounts {
-  id        String   @id @default(cuid())
-  CreatedAt DateTime @default(now())
-  Email     String   @unique
-  Password  String
-}
-
 model Accounts {
   id             String           @id @default(cuid())
-  CreatedAt      DateTime
-  VerifiedAt     DateTime         @default(now())
+  CreatedAt      DateTime         @default(now())
   Email          String           @unique
   Password       String
-  Role           Roles            @default(USER)
+  Accepted       Boolean          @default(false)
+  Role           Roles            @default(PARTICIPANT)
+  Profile        Profiles[]
   PaymentDetails PaymentDetails[]
   Logs           Logs[]
 }
@@ -49,14 +45,19 @@ model Profiles {
   Facebook                      String?
   Diet                          String?
   Diseases                      String?
-  COVID_14Days                  Boolean @default(false)
+  COVID_14Days                  Boolean   @default(false)
+  SelfPortrait                  String?
+  ParentialConsent              String?
   Emergency_ContactName         String?
   Emergency_ContactNumber       String?
   Emergency_ContactRelationship String?
   Emergency_BloodType           String?
+  PassedTest                    Boolean   @default(false)
   Github                        String?
   Discord                       String?
   AccountId                     String    @unique
+  Accounts                      Accounts? @relation(fields: [accountsId], references: [id])
+  accountsId                    String?
 }
 
 model PaymentDetails {
@@ -69,16 +70,17 @@ model PaymentDetails {
 }
 
 model Logs {
-  id         Int       @id @default(autoincrement())
-  ActionType String
-  Accounts   Accounts? @relation(fields: [AccountId], references: [id])
-  AccountId  String?
-  Details    String
-  TimeStamp  DateTime  @default(now())
+  id          Int       @id @default(autoincrement())
+  Accounts    Accounts? @relation(fields: [AccountId], references: [id])
+  AccountId   String?
+  AccountType String
+  Details     String
+  TimeStamp   DateTime  @default(now())
 }
 
 enum Roles {
   DEVELOPER
   ADMIN
-  USER
+  STAFF
+  PARTICIPANT
 }
