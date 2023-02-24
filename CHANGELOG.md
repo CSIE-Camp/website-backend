@@ -223,7 +223,7 @@
 
 ### 2023-02-25 05:51 (Maxx) ###
  **Added**
- - New Email Service (Thanks to [@Alphabeee](https://github.com/Alphabeee) and [@JacobLinCool](https://github.com/JacobLinCool))
+ - [New Email Service](https://hermes.csie.cool) (Thanks to [@Alphabeee](https://github.com/Alphabeee) and [@JacobLinCool](https://github.com/JacobLinCool))
  - RevokeAllRefreshToken in Tokens.js
  - GetAccountId in Database.js
 
