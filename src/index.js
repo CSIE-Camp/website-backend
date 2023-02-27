@@ -13,6 +13,7 @@ app.use(express.json());
 
 const index = require("./routes/index");
 const login = require("./routes/login");
+const admin = require("./routes/admin");
 const signup = require("./routes/signup");
 const profile = require("./routes/profile");
 const verification = require("./routes/verification");
@@ -24,6 +25,7 @@ app.get("/", (req, res) => {
 
 app.use("/", index);
 app.use("/login", login);
+app.use("/admin", admin);
 app.use("/signup", signup);
 app.use("/profile", profile);
 app.use("/verification", verification);
@@ -36,19 +38,6 @@ app.get("*", (req, res) => {
 	return res.status(404).send("URL not found!");
 });
 
-
-/*
-hi, please put the send email code in ./Modules/EmailService, thanks
-*/
-
 app.listen(PORT, () => {
 	console.log(`Listening on Port ${PORT}`);
 });
-
-/*
-Create account flow:
-Verify email addr at with /api/v1/verify
-click on sus link that redirects to /api/v1/verify/:id
-if not verified then return error
-if verified then redirect to account status page
-*/

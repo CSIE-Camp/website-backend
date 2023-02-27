@@ -24,6 +24,7 @@ module.exports = {
 	HERMES_MAIL_TOKEN: process.env.HERMES_MAIL_TOKEN,
 
 	SALTROUNDS: 14,
+	DEV_MODE: true,
 	CLIENT_URL: process.env.CLIENT_URL,
 	PORT: Number(process.env.PORT) || 8080,
 };

@@ -14,12 +14,6 @@ model CampStatus {
   AllowStatusLookup Boolean   @default(false)
 }
 
-model Tokens {
-  Token     String   @id
-  AccountId String   @unique
-  CreatedAt DateTime @default(now())
-}
-
 model Accounts {
   id             String           @id @default(cuid())
   CreatedAt      DateTime         @default(now())
@@ -28,8 +22,16 @@ model Accounts {
   Accepted       Boolean          @default(false)
   Role           Roles            @default(PARTICIPANT)
   Profile        Profiles[]
+  RefreshTokens  RefreshTokens[]
   PaymentDetails PaymentDetails[]
-  Logs           Logs[]
+}
+
+model RefreshTokens {
+  id        String    @id @unique
+  Token     String
+  CreatedAt String
+  Accounts  Accounts? @relation(fields: [AccountId], references: [id])
+  AccountId String?
 }
 
 //Accounts and Profile should have a 1-1 relationship
@@ -56,26 +58,26 @@ model Profiles {
   Github                        String?
   Discord                       String?
   AccountId                     String    @unique
-  Accounts                      Accounts? @relation(fields: [accountsId], references: [id])
-  accountsId                    String?
+  Accounts                      Accounts? @relation(fields: [AccountId], references: [id])
 }
 
 model PaymentDetails {
   id                  Int       @id @default(autoincrement())
-  TransferDate        DateTime
-  AccountName         String
-  Account_Last5Digits String
+  TransferDate        DateTime?
+  AccountName         String?
+  Account_Last5Digits String?
+  PaymentConfirmed    Boolean   @default(false)
+  ConfirmedBy         String?
   Account             Accounts? @relation(fields: [AccountId], references: [id])
-  AccountId           String?
+  AccountId           String?   @unique
 }
 
 model Logs {
-  id          Int       @id @default(autoincrement())
-  Accounts    Accounts? @relation(fields: [AccountId], references: [id])
-  AccountId   String?
+  id          Int      @id @default(autoincrement())
+  AccountId   String
   AccountType String
   Details     String
-  TimeStamp   DateTime  @default(now())
+  TimeStamp   DateTime @default(now())
 }
 
 enum Roles {

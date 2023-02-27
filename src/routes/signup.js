@@ -15,7 +15,6 @@ const router = express.Router();
 router.post("/email", async (req, res) => {
 	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 	let email = req.body.email;
-	console.log(req.body);
 	if (!(email && IsValidString(email))){
 		return res.status(400).json({message: "Invalid email"});
 	}
@@ -35,13 +34,18 @@ router.post("/email", async (req, res) => {
 router.post("/password", AuthenticateTempAccessToken, async (req, res) => {
 	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 	let email = req.email;
-	console.log(req.body);
 	let password = req.body.password;
 	if (!(password && IsValidString(password))){
 		return res.status(400).json({message: "Password not provided"});
 	}
 	if (!IsValidPassword(password)){
 		return res.status(418).json({message: "Are you a teapot?"});
+	}
+	if (!IsValidEmail(email)){
+		return res.status(400).json({message: "Invalid email"});
+	}
+	if (await FindAccountByEmail(email)){
+		return res.status(403).json({message: "Email has been registered to an account, sign in instead!"});
 	}
 	try {
 		let hashed = await bcrypt.hash(password, SALTROUNDS);

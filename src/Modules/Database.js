@@ -1,9 +1,21 @@
+const {DEV_MODE} = require("./../config");
 const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient;
 
+async function Log(AccountId, AccountType, Details){
+	if (DEV_MODE) {return;};
+	await prisma.logs.create({
+		data: {
+			AccountId: AccountId,
+			AccountType: AccountType,
+			Details: Details,
+		},
+	});
+}
+
 async function CreateAccount(Email, HashedPassword) {
-	let UserRecord = await prisma.accounts.create({
+	let Account = await prisma.accounts.create({
 		data: {
 			Email: Email,
 			Password: HashedPassword,
@@ -12,10 +24,15 @@ async function CreateAccount(Email, HashedPassword) {
 
 	await prisma.profiles.create({
 		data: {
-			AccountId: UserRecord.id,
+			AccountId: Account.id,
 		},
 	});
-	return UserRecord;
+	await prisma.paymentDetails.create({
+		data: {
+			AccountId: Account.id,
+		},
+	});
+	return Account;
 }
 
 
@@ -126,7 +143,7 @@ async function FindProfile(id) {
 		Profile["ID_Documents"] = Profile.Unvalidate_ID;
 	}
 	delete (Profile.id);
-	delete (Profile.AccountId);
+	delete(Profile.AccountId);
 	return Profile;
 }
 
@@ -163,19 +180,172 @@ async function UpdateProfile(AccountId, data) {
 	return NewProfile;
 }
 
-async function DeleteProfile(AccountId) {
+async function GetPaymentDetails(AccountId){
+	let PaymentDetails = await prisma.paymentDetails.findUnique({
+		where: {
+			AccountId: AccountId,
+		},
+	});
+	delete(PaymentDetails.id);
+	delete(PaymentDetails.AccountId);
+	return PaymentDetails;
+}
+
+async function UpdatePaymentData(AccountId, TransferDate, AccountName, Last5Digits){
+	let PaymentData = await prisma.paymentDetails.update({
+		where: {
+			AccountId: AccountId,
+		},
+		data: {
+			TransferDate: TransferDate,
+			AccountName: AccountName,
+			Account_Last5Digits: Last5Digits,
+		},
+	});
+	return PaymentData;
+}
+
+async function ConfirmPaymentStatus(Staff, ip, AccountId){
+	let PaymentDetails = await prisma.findUnqiue({
+		where: {
+			AccountId: TargetId,
+		},
+	});
+	if (!PaymentDetails || PaymentDetails.TransferDate == null){
+		await Log(Staff.id, Staff.Role, `Attempted to confirm null payment status for ${AccountId} from [${ip}]`);
+		return false;
+	}
+	await prisma.paymentDetails.update({
+		where: {
+			AccountId: AccountId,
+		},
+		data: {
+			PaymentConfirmed: true,
+		},
+	});
+	return true;
+}
+
+async function AdminViewProfile(TargetId, {AccountId, AccountRole}){
+	let ReturnData = {
+		Account: {},
+	};
+	let Account = await prisma.accounts.findUnique({
+		where: {
+			id: TargetId,
+		},
+	});
+	ReturnData.Account.Email = Account.Email;
+	ReturnData.Account.CreatedAt = Account.CreatedAt;
+	ReturnData.Account.Role = Account.Role;
+	Account = null;
+	ReturnData.Profile = await prisma.profiles.findUnique({
+		where: {
+			AccountId: TargetId,
+		},
+	});
+	ReturnData.PaymentDetails = await GetPaymentDetails(TargetId);
+	
+	await Log(AccountId, AccountRole, `Has queried profile data for account ${TargetId}`);
+	return ReturnData;
+}
+
+async function AdminViewAllProfile(AccountId, AccountRole){
+	let ReturnData = {};
+	let Accounts = await prisma.accounts.findMany();
+	for (let i = 0; i < Accounts.length; i++){
+		let Account = Accounts[i];
+		ReturnData[Account.id] = {
+			Account: {
+				Email: Account.Email,
+				CreatedAt: Account.CreatedAt,
+				Role: Account.Role,
+			},
+			Profile: await FindProfile(Account.id),
+			PaymentDetails: await GetPaymentDetails(Account.id),
+		};
+	};
+	await Log(AccountId, AccountRole, "User has queried for ALL profile data");
+	return ReturnData;
+}
+
+async function GetStoredRefreshTokens(AccountId){
+	let Tokens = await prisma.refreshTokens.findMany({
+		where: {
+			AccountId: AccountId,
+		},
+	});
+	let ReturnData = {};
+	for (let i = 0; i < Tokens.length; i++){
+		let Token = Tokens[i];
+		ReturnData[Token.id] = {
+			Token: Token.Token,
+			CreatedAt: Token.CreatedAt,
+		};
+	}
+	return ReturnData;
+}
+
+async function AddStoredRefreshTokens(AccountId, TokenId, Token, CreatedAt){
+	await prisma.refreshTokens.create({
+		data: {
+			id: TokenId,
+			Token: Token,
+			CreatedAt: CreatedAt,
+			AccountId: AccountId,
+		},
+	});
+	return;
+}
+
+async function RevokeStoredRefreshToken(AccountId, TokenId){
+	await prisma.refreshTokens.delete({
+		where: {
+			id: TokenId,
+		},
+	});
+	return;
+}
+
+async function RevokeAllStoredRefreshTokens(AccountId){
+	await prisma.refreshTokens.deleteMany({
+		where: {
+			AccountId: AccountId,
+		},
+	});
+	return;
+}
+
+async function UpdateAccountStatus(AccountId, TargetId, Status){
 
 }
 
-
 module.exports = {
+	Log: Log,
+
 	CreateAccount: CreateAccount,
 	UpdateAccountEmail: UpdateAccountEmail,
 	UpdateAccountPassword: UpdateAccountPassword,
+
+	UpdatePaymentData: UpdatePaymentData,
+	ConfirmPaymentStatus: ConfirmPaymentStatus,
+
 	FindAccountByEmail: FindAccountByEmail,
 	FindAccountById: FindAccountById,
+
 	GetAccountId: GetAccountId,
 	GetEmergencyInfo: GetEmergencyInfo,
+
 	FindProfile: FindProfile,
 	UpdateProfile: UpdateProfile,
+
+	AdminViewProfile: AdminViewProfile,
+	AdminViewAllProfile: AdminViewAllProfile,
+
+	GetStoredRefreshTokens: GetStoredRefreshTokens,
+	AddStoredRefreshTokens: AddStoredRefreshTokens,
+	RevokeStoredRefreshToken: RevokeStoredRefreshToken,
+	RevokeAllStoredRefreshTokens: RevokeAllStoredRefreshTokens,
+
+	UpdateAccountStatus: UpdateAccountStatus,
 };

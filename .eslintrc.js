@@ -11,10 +11,10 @@ module.exports = {
 		"ecmaVersion": "latest",
 	},
 	"rules": {
-		"max-len": ["error", { "code": 150 }],
+		//"max-len": ["error", { "code": 150 }],
 		"quotes": ["error", "double"],
 		"semi": ["error", "always"],
-		"indent": ["error", "tab"],
+		//"indent": ["error", "tab"],
 		"comma-dangle": ["error", "always-multiline"],
 		"no-unused-vars": ["off"],
 	},

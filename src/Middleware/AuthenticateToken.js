@@ -15,6 +15,7 @@ function AuthenticateAccessToken(req, res, next){
 			return res.status(403).json({message: "Invalid token!"});
 		}
 		req.userid = decoded.UserId;
+		req.role = decoded.Role;
 		next();
 	});
 }
