@@ -236,13 +236,15 @@
  - Old deprecated Accounts.js
  - Unused functions in Signup
 
-### 2023-02-27 XX:XX (Maxx) ###
+### 2023-02-27 23:10 (Maxx) ###
  **Added**
  - Added /admin
  - Added a Log() function in Database, some actions will be logged in the database (I'm not sure if this is a good idea ngl)
  - Added Account Roles to the AccessTokens
  - Added DEV_MODE to config.js
-
+ - Added APIs to admin
+ - Resturctured DB schema (again)
+ 
  **Changed**
  - Basically rewrote everything related to refresh tokens (Twice because I'm an idiot + bug fix :3 )
 

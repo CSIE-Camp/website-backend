@@ -15,12 +15,12 @@ model CampStatus {
 }
 
 model Accounts {
-  id             String           @id @default(cuid())
-  CreatedAt      DateTime         @default(now())
-  Email          String           @unique
+  id             String            @id @default(cuid())
+  CreatedAt      DateTime          @default(now())
+  Email          String            @unique
   Password       String
-  Accepted       Boolean          @default(false)
-  Role           Roles            @default(PARTICIPANT)
+  Status         ApplicationStatus @default(NOT_STARTED)
+  Role           Roles             @default(PARTICIPANT)
   Profile        Profiles[]
   RefreshTokens  RefreshTokens[]
   PaymentDetails PaymentDetails[]
@@ -40,15 +40,21 @@ model Profiles {
   Name                          String?
   Gender                        String?
   School                        String?
-  DOB                           DateTime?
-  Validated_ID                  String?
-  Unvalidate_ID                 String?
-  Number                        String?
+  DOB                           String?
+  ID_Doc                        String?
+  ID_Validated                  Boolean   @default(false)
+  PhoneNumber                   String?
   Facebook                      String?
   Diet                          String?
+  Allergen                      String?
   Diseases                      String?
-  COVID_14Days                  Boolean   @default(false)
+  TravelHistory                 Boolean   @default(false)
   SelfPortrait                  String?
+  SelfIntro                     String?
+  Motivation                    String?
+  Lang_Learned                  String?
+  Lang_Mastered                 String?
+  ClothesSize                   String?
   ParentialConsent              String?
   Emergency_ContactName         String?
   Emergency_ContactNumber       String?
@@ -62,22 +68,28 @@ model Profiles {
 }
 
 model PaymentDetails {
-  id                  Int       @id @default(autoincrement())
+  id                  Int           @id @default(autoincrement())
   TransferDate        DateTime?
   AccountName         String?
   Account_Last5Digits String?
-  PaymentConfirmed    Boolean   @default(false)
-  ConfirmedBy         String?
-  Account             Accounts? @relation(fields: [AccountId], references: [id])
-  AccountId           String?   @unique
+  PaymentConfirmed    PaymentStatus @default(UNPAID)
+  LastEditedBy        String?
+  Account             Accounts?     @relation(fields: [AccountId], references: [id])
+  AccountId           String?       @unique
 }
 
 model Logs {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   AccountId   String
   AccountType String
   Details     String
-  TimeStamp   DateTime @default(now())
+  TimeStamp   DateTime  @default(now())
+}
+
+enum PaymentStatus {
+  PAID
+  REFUNDED
+  UNPAID
 }
 
 enum Roles {
@@ -85,4 +97,14 @@ enum Roles {
   ADMIN
   STAFF
   PARTICIPANT
+}
+
+enum ApplicationStatus {
+  STAFF
+  ACCEPTED
+  WAITLIST_ACCEPTED
+  WAITLIST
+  REJECTED
+  GAVE_UP
+  NOT_STARTED
 }

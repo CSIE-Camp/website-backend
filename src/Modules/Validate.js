@@ -98,7 +98,7 @@ function IsValidBloodType(bloodtype){
 }
 
 const LevelLUT = {
-	DEVELOPER:2,
+	DEVELOPER: 3,
 	ADMIN: 2,
 	STAFF: 1,
 	PARTICIPANT: 0,

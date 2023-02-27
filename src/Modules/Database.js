@@ -4,7 +4,6 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient;
 
 async function Log(AccountId, AccountType, Details){
-	if (DEV_MODE) {return;};
 	await prisma.logs.create({
 		data: {
 			AccountId: AccountId,
@@ -12,6 +11,7 @@ async function Log(AccountId, AccountType, Details){
 			Details: Details,
 		},
 	});
+	return;
 }
 
 async function CreateAccount(Email, HashedPassword) {
@@ -23,11 +23,6 @@ async function CreateAccount(Email, HashedPassword) {
 	});
 
 	await prisma.profiles.create({
-		data: {
-			AccountId: Account.id,
-		},
-	});
-	await prisma.paymentDetails.create({
 		data: {
 			AccountId: Account.id,
 		},
@@ -191,7 +186,12 @@ async function GetPaymentDetails(AccountId){
 	return PaymentDetails;
 }
 
+
 async function UpdatePaymentData(AccountId, TransferDate, AccountName, Last5Digits){
+	let Account = await FindAccountById(AccountId);
+	if (!Account.Accepted){
+		return false;
+	}
 	let PaymentData = await prisma.paymentDetails.update({
 		where: {
 			AccountId: AccountId,
@@ -205,25 +205,89 @@ async function UpdatePaymentData(AccountId, TransferDate, AccountName, Last5Digi
 	return PaymentData;
 }
 
-async function ConfirmPaymentStatus(Staff, ip, AccountId){
-	let PaymentDetails = await prisma.findUnqiue({
+
+const AvailableApplicationStatus = ["STAFF", "ACCEPTED", "WAITLIST_ACCEPTED", "WAITLIST", "GAVE_UP", "NOT_STARTED"];
+
+async function ChangeApplicationStatus(StaffId, StaffRole, AccountId, Status, ip){
+	if (AvailableApplicationStatus.indexOf(Status) < 0){
+		await Log(StaffId, StaffRole, `Attempted to give non-existent roles from [${ip}]`);
+		return [false, "Status not allowed"];
+	}
+	let Account = await FindAccountById(AccountId);
+	if (!Account){
+		return [false, "Account not found"];
+	}
+	await prisma.accounts.update({
 		where: {
-			AccountId: TargetId,
+			id: AccountId,
+		},
+		data: {
+			Status: Status,
 		},
 	});
-	if (!PaymentDetails || PaymentDetails.TransferDate == null){
-		await Log(Staff.id, Staff.Role, `Attempted to confirm null payment status for ${AccountId} from [${ip}]`);
-		return false;
+	if (Status == "ACCEPTED" || Status == "WAITLIST_ACCEPTED"){
+		await prisma.paymentDetails.create({
+			data: {
+				AccountId: AccountId,
+			},
+		});
+	}
+	return [true, "success!"];
+}
+
+async function RefundParticipant(StaffId, StaffRole, AccountId, ip){
+	let Account = await FindAccountById(AccountId);
+	if (!Account.Status === "GAVE_UP"){
+		return [false, "Unable to confirm refund status. Participant has not given up"];
 	}
 	await prisma.paymentDetails.update({
 		where: {
 			AccountId: AccountId,
 		},
 		data: {
-			PaymentConfirmed: true,
+			PaymentConfirmed: "REFUNDED",
+			LastEditedBy: StaffId,
 		},
 	});
-	return true;
+	await Log(StaffId, StaffRole, `Has changed ${AccountId} payment status to REFUNDED from [${ip}]`);
+	return [true, "Success!"];
+}
+
+async function ConfirmPaymentStatus(StaffId, StaffRole, AccountId, ip){
+	let Account = await FindAccountById(AccountId);
+	if (!Account){
+		console.log(AccountId);
+		return [false, "Account not found"];
+	}
+	if (Account.Status !== "ACCEPTED" && Account.Status !== "WAITLIST_ACCEPTED"){
+		return [false, "Not accepted"];
+	}
+	if (Account.Status == "GAVE_UP"){
+		return [false, "Participant has given up their slot"];
+	}
+	let PaymentDetails = await prisma.paymentDetails.findUnique({
+		where: {
+			AccountId: AccountId,
+		},
+	});
+	
+	if (!PaymentDetails || PaymentDetails.TransferDate == null){
+		await Log(StaffId, StaffRole, `Attempted to confirm null payment status for ${AccountId} from [${ip}]`);
+		return [false, "Account has not update payment data"];
+	}
+	if (PaymentDetails.PaymentConfirmed == "REFUNDED"){
+		return [false, "Payment has been refunded"];
+	}
+	await prisma.paymentDetails.update({
+		where: {
+			AccountId: AccountId,
+		},
+		data: {
+			LastEditedBy: StaffId,
+			PaymentConfirmed: "PAID",
+		},
+	});
+	return [true, "success"];
 }
 
 async function AdminViewProfile(TargetId, {AccountId, AccountRole}){
@@ -235,6 +299,9 @@ async function AdminViewProfile(TargetId, {AccountId, AccountRole}){
 			id: TargetId,
 		},
 	});
+	if (!Account){
+		return {message: "Account does not exist!"};
+	}
 	ReturnData.Account.Email = Account.Email;
 	ReturnData.Account.CreatedAt = Account.CreatedAt;
 	ReturnData.Account.Role = Account.Role;
@@ -260,10 +327,13 @@ async function AdminViewAllProfile(AccountId, AccountRole){
 				Email: Account.Email,
 				CreatedAt: Account.CreatedAt,
 				Role: Account.Role,
+				Status:  Account.Status,
 			},
 			Profile: await FindProfile(Account.id),
-			PaymentDetails: await GetPaymentDetails(Account.id),
 		};
+		if (Account.Status === "ACCEPTED" || Account.Status === "WAITLIST_ACCEPTED"){
+			ReturnData.PaymentDetails = await GetPaymentDetails(Account.id);
+		}
 	};
 	await Log(AccountId, AccountRole, "User has queried for ALL profile data");
 	return ReturnData;
@@ -316,8 +386,41 @@ async function RevokeAllStoredRefreshTokens(AccountId){
 	return;
 }
 
-async function UpdateAccountStatus(AccountId, TargetId, Status){
+async function UpdateAccountRoles(AccountId, AccountRole, TargetAccount, NewRole){
+	let Account = await FindAccountById(TargetAccount);
+	if (!Account){
+		return "Account not found!";
+	}
+	let OldRole = Account.Role;
+	await prisma.accounts.update({
+		where: {
+			id: TargetAccount,
+		},
+		data: {
+			Role: NewRole,
+		},
+	});
+	await Log(AccountId, AccountRole, `Updated ${TargetAccount}'s role from ${OldRole} to ${NewRole}`);
+	return "Success!";
+}
 
+async function GetLogs(AccountId, AccountRole, TargetAccount, ip){
+	if (TargetAccount === "null"){
+		await Log(AccountId, AccountRole, `has accessed all logs from [${ip}]`);
+		return await prisma.logs.findMany();
+	}
+	let Account = await FindAccountById(TargetAccount);
+	if (!Account){
+		await Log(AccountId, AccountRole, `attempted to access logs from non-existing account from [${ip}]`);
+		return {message: "Target account not found!"};
+	}
+	await Log(AccountId, AccountRole, `accessed logs from account ${TargetAccount} from [${ip}]`);
+	let Logs = await prisma.logs.findMany({
+		where: {
+			AccountId: TargetAccount,
+		},
+	});
+	return Logs;
 }
 
 module.exports = {
@@ -328,6 +431,7 @@ module.exports = {
 	UpdateAccountPassword: UpdateAccountPassword,
 
 	UpdatePaymentData: UpdatePaymentData,
+	ChangeApplicationStatus: ChangeApplicationStatus,
 	ConfirmPaymentStatus: ConfirmPaymentStatus,
 
 	FindAccountByEmail: FindAccountByEmail,
@@ -342,10 +446,12 @@ module.exports = {
 	AdminViewProfile: AdminViewProfile,
 	AdminViewAllProfile: AdminViewAllProfile,
 
+
 	GetStoredRefreshTokens: GetStoredRefreshTokens,
 	AddStoredRefreshTokens: AddStoredRefreshTokens,
 	RevokeStoredRefreshToken: RevokeStoredRefreshToken,
 	RevokeAllStoredRefreshTokens: RevokeAllStoredRefreshTokens,
 
-	UpdateAccountStatus: UpdateAccountStatus,
+	UpdateAccountRoles: UpdateAccountRoles,
+	GetLogs: GetLogs,
 };

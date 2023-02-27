@@ -74,6 +74,15 @@ async function GetRefreshTokens(AccountId){
 	return StoredTokens;
 }
 
+async function FindRefreshToken(AccountId, TokenId){
+	let Tokens = await GetRefreshTokens(AccountId);
+	let Keys = Object.keys(Tokens);
+	if (Keys.indexOf(TokenId) > -1){
+		return true;
+	}
+	return false;
+}
+
 async function RevokeOldestRefreshToken(AccountId, Tokens){
 	let Keys = Object.keys(Tokens);
 	let Oldest = Date.now();
@@ -165,4 +174,5 @@ module.exports = {
 	GenerateRefreshToken: GenerateRefreshToken,
 	GeneratePasswordResetToken: GeneratePasswordResetToken,
 	GenerateTempAccessToken: GenerateTempAccessToken,
+	FindRefreshToken: FindRefreshToken,
 };

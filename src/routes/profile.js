@@ -6,6 +6,7 @@ const express = require("express");
 const crypto = require("crypto");
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
 
 const router = express.Router();
 
@@ -15,7 +16,7 @@ const storage = multer.diskStorage({
 	},
 	filename: (req, file, cb) => {
 		let img = crypto.randomBytes(16).toString("hex") + path.extname(file.originalname);
-		req.path = `${path.join(__dirname, "..", "uploads", "images")}/${img}`;
+		req.imagepath = `${path.join(__dirname, "..", "uploads", "images")}/${img}`;
 		cb(null, img);
 	},
 });
@@ -41,15 +42,46 @@ router.get("/", AuthenticateAccessToken, async (req, res) => {
 	return res.status(200).json({ success: true, profile });
 });
 
-router.post("/update", AuthenticateAccessToken, upload.single("image"), async (req, res) => {
+router.post("/update"/*, AuthenticateAccessToken*/, upload.single("selfPicture"), async (req, res) => {
 	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-	let profile = JSON.parse(req.body.profile);
-	profile.SelfPortrait = req.path || "";
-	let UserId = req.userid;
+	let profile = req.body;
+	let ImagePath = req.imagepath;
+	console.log(ImagePath);
+	let UserId = "clemwblys0000slpov5m5ad74"; //req.userid;
 	let doc_flag = false;
 	if (profile.id || profile.AccountId) {
+		if (ImagePath){
+			fs.unlink(ImagePath, (err) => {
+				if (err){
+					console.error(err);
+				}
+			});
+		}
 		return res.status(403).json({ message: "Well...at least you tried" });
 	}
+	/*
+		name
+		gender
+		school
+		birthDate
+		personalId
+		phoneNumber
+		bloodType
+		fbLink
+		parentName
+		relation
+		parentPhoneNumber
+		travelHistory
+		foodType
+		allergySource
+		disease
+		clothesSize
+		selfIntro
+		motivation
+		selfPicture
+		lanlearned
+		lanMaster
+	*/
 	if (profile.ID_Documents){
 		let {success, doc} = ValidateDocuments(profile.ID_Documents);
 		doc_flag = success;
