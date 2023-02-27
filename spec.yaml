@@ -15,6 +15,7 @@ tags:
   - name: Signup
   - name: Login
   - name: Profile
+  - name: Admin
 paths:
   /signp/email:
     post:
@@ -27,17 +28,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/signup_email'
+              $ref: "#/components/schemas/signup_email"
       responses:
-        '200':
+        "200":
           description: >-
             Successfully send verification email. Ask the user to verify their
             email
-        '400':
+        "400":
           description: Password was null or empty
-        '403':
+        "403":
           description: Email is in use
-        '500':
+        "500":
           description: Unexpected errors
   /signp/password:
     post:
@@ -56,15 +57,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/signup_password'
+              $ref: "#/components/schemas/signup_password"
       responses:
-        '200':
+        "200":
           description: Successfully created the account. Ask the user to login
-        '400':
+        "400":
           description: Password was null or empty
-        '418':
+        "418":
           description: Provided password was not a hex digest of a SHA512 hash
-        '500':
+        "500":
           description: Unexpected errors
   /login:
     post:
@@ -79,21 +80,21 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/login'
+              $ref: "#/components/schemas/login"
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/login_response_success'
-        '400':
+                $ref: "#/components/schemas/login_response_success"
+        "400":
           description: Invalid data
-        '403':
+        "403":
           description: Account does not exist
-        '418':
+        "418":
           description: Password was not a SHA512 hash
-        '500':
+        "500":
           description: Unexpected error
     delete:
       tags:
@@ -108,17 +109,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/logout'
+              $ref: "#/components/schemas/logout"
       responses:
-        '200':
+        "200":
           description: Ok
-        '400':
+        "400":
           description: Invalid data
-        '403':
+        "403":
           description: Invalid token
-        '401':
+        "401":
           description: Invalid token
-        
+
   /login/refresh:
     post:
       tags:
@@ -129,16 +130,16 @@ paths:
         description: >-
           Submit the refresh token
         content:
-         application/json:
-           schema:
-             $ref: '#/components/schemas/refresh'
-      responses: 
-        '200':
+          application/json:
+            schema:
+              $ref: "#/components/schemas/refresh"
+      responses:
+        "200":
           description: Ok
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/refresh_response_success'
+                $ref: "#/components/schemas/refresh_response_success"
   /login/password/reset:
     post:
       tags:
@@ -151,11 +152,11 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/password-reset'
+              $ref: "#/components/schemas/password-reset"
       responses:
-        '200':
+        "200":
           description: Ok
-        '500':
+        "500":
           description: Unexpected error
   /login/password/update:
     post:
@@ -169,16 +170,56 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/login'
+              $ref: "#/components/schemas/login"
       responses:
-        '200':
+        "200":
           description: Ok
-        '400':
+        "400":
           description: Invalid data
-        '418':
+        "418":
           description: Provided password was not a hex digest of a SHA512 hash
-        '500':
+        "500":
           description: Unexpected error
+  /admin/view-profile/{id}:
+    get:
+      tags:
+        - Admin
+      summary: Go to users' profile
+      description: Goes to requested users profile if you are an admin
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: "#/components/schemas/profile-id"
+          description: >-
+            "null" or accountId
+      responses:
+        "200":
+          description: Ok
+        "401":
+          description: Insufficient privileges
+  /admin/update_profile:
+    post:
+      tags:
+        - Admin
+      summary: Change target account's status
+      description: Change target account's application and/or payment status
+      requestBody:
+        description: >-
+          Submit target account id, application status and payment status
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/update-profile"
+      responses:
+        "200":
+          description: Ok
+        "401":
+          description: Insufficient privileges
+        "400":
+          description: Invalid data
+
 components:
   securitySchemes:
     bearerAuth:
@@ -241,3 +282,17 @@ components:
         email:
           type: string
           example: test@example.com
+    profile-id:
+      type: object
+      properties:
+        accountId:
+          type: string
+    update-profile:
+      type: object
+      properties:
+        TargetAccount:
+          type: string
+        ApplicationStatus:
+          type: integer
+        PaymentStatus:
+          type: integer
