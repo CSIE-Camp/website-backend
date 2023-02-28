@@ -114,6 +114,25 @@ async function RevokeOldestRefreshToken(AccountId, Tokens){
 	return Tokens;
 }
 
+async function RevokeRefreshToken(AccountId, TokenId){
+	await CheckRedisConnection();
+	let RedisTokens = RedisClient.hGet(REDIS_REFRESH_TOKEN_FIELD, AccountId);
+	RedisTokens = JSON.parse(RedisTokens);
+	let Keys = Object.keys(RedisTokens);
+	let Index = Keys.indexOf(TokenId);
+	if (Index === -1){
+		return "Token not found!";
+	}
+	delete(RedisTokens[TokenId]);
+	await RedisClient.hSet(REDIS_REFRESH_TOKEN_FIELD, AccountId, JSON.stringify(RedisTokens), (err) => {
+		if (err){
+			console.error(err);
+		}
+	});
+	await RevokeStoredRefreshToken(AccountId, TokenId);
+	return;
+}
+
 async function RevokeAllRefreshTokens(AccountId){
 	await RedisClient.hDel(REDIS_REFRESH_TOKEN_FIELD, AccountId);
 	await RevokeAllStoredRefreshTokens(AccountId);
@@ -183,5 +202,6 @@ module.exports = {
 	GenerateTempAccessToken: GenerateTempAccessToken,
 	FindRefreshToken: FindRefreshToken,
 	RevokeAllRefreshTokens: RevokeAllRefreshTokens,
+	RevokeRefreshToken: RevokeRefreshToken,
 	CompareRoles: CompareRoles,
 };

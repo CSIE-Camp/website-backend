@@ -78,4 +78,5 @@ async function SendLoginNotifEmail(email, ip){
 module.exports = {
 	SendVerifyEmail: SendVerifyEmail,
 	SendPasswordResetEmail: SendPasswordResetEmail,
+	SendLoginNotifEmail: SendLoginNotifEmail,
 };

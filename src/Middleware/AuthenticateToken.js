@@ -1,5 +1,5 @@
 const { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET, EMAIL_TOKEN_SECRET, TEMP_ACCESS_SECRET} = require("./../config");
-const {FindRefreshToken} = require("./../Modules/Tokens");
+const { FindRefreshToken } = require("./../Modules/Tokens");
 const jwt = require("jsonwebtoken");
 
 function AuthenticateAccessToken(req, res, next){
@@ -21,7 +21,7 @@ function AuthenticateAccessToken(req, res, next){
 	});
 }
 
-function AuthenticateRefreshToken(req, res, next){
+async function AuthenticateRefreshToken(req, res, next){
 	let token = req.headers.authorization;
 	if (!token){
 		return res.status(498).json({message: "Missing token"});
@@ -35,9 +35,6 @@ function AuthenticateRefreshToken(req, res, next){
 			return res.status(403).json({message: "Invalid token!"});
 		}
 		let TokenId = decoded._id;
-		if (!FindRefreshToken(decoded.UserId, TokenId)){
-			return res.status(403).json({message: "Invalid refresh token"});
-		}
 		req.refresh_token = token;
 		req.UserId = decoded.UserId;
 		req.refresh_token_id = decoded._id;

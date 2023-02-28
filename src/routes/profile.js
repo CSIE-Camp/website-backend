@@ -1,7 +1,7 @@
 const { AuthenticateAccessToken } = require("./../Middleware/AuthenticateToken");
 const { FindProfile, UpdateProfile, GetCampStatus } = require("./../Modules/Database");
 const { ValidateDocuments, IsValidNumber, IsValidFacebookUrl, IsValidBloodType } = require("./../Modules/Validate");
-
+const {	CompareRoles } = require("./../Modules/Tokens");
 const express = require("express");
 const crypto = require("crypto");
 const multer = require("multer");
@@ -42,6 +42,7 @@ router.get("/", AuthenticateAccessToken, async (req, res) => {
 	let NewToken = await CompareRoles(AccountId, AccountRole, ip);
     let ReturnData = {};
     if (NewToken){
+		ReturnData.tokens = {};
         ReturnData.tokens.access_token = NewToken;
         ReturnData.tokens.token_type = "Bearer";
     }
@@ -58,20 +59,23 @@ async function RemoveImage(Path){
 	});
 }
 
-router.post("/update", AuthenticateAccessToken, upload.single("selfPicture"), async (req, res) => {
+router.post("/update"/*, AuthenticateAccessToken*/, upload.single("selfPicture"), async (req, res) => {
 	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 	let Profile = req.body;
 	Profile.ImagePath = req.imagepath;
-	let AccountId = req.userid;
+	let AccountId = "clemwblys0000slpov5m5ad74"; //req.userid;
+	let AccountRole = "DEVELOPER"; //req.role;
 	let ReturnData = {};
 	let Flags = {};
 	let CampStatus = await GetCampStatus();
-	if (!CampStatus.AllowRegistration){
+
+	if (!CampStatus.Allow_Registration){
 		RemoveImage(Profile.ImagePath);
 		return res.status(403).json({message: "Registration has not started"});
 	}
-	let CurrentTimeStamp = Date.now();
+	let CurrentTimeStamp = (Date.now() / 1000).toFixed(0);
 	let DeadlineTimeStamp = Number(CampStatus.Apply_Deadline_TimeStamp);
+	console.log(CurrentTimeStamp > DeadlineTimeStamp);
 	if (CurrentTimeStamp > DeadlineTimeStamp){
 		RemoveImage(Profile.ImagePath);
 		return res.status(403).json({message: `You're ${CurrentTimeStamp - DeadlineTimeStamp} seconds late :<`});
@@ -150,6 +154,7 @@ router.post("/update", AuthenticateAccessToken, upload.single("selfPicture"), as
 	}
 	let NewToken = await CompareRoles(AccountId, AccountRole, ip);
     if (NewToken){
+		ReturnData.tokens = {};
         ReturnData.tokens.access_token = NewToken;
         ReturnData.tokens.token_type = "Bearer";
     }
@@ -157,6 +162,8 @@ router.post("/update", AuthenticateAccessToken, upload.single("selfPicture"), as
 	ReturnData.StoredData = Status;
 	ReturnData.InvalidData = Flags;
 	ReturnData.MissingData = MissingFields;
+	console.log(MissingFields);
+	
 	return res.status(200).json(ReturnData);
 });
 

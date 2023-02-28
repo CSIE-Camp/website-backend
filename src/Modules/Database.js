@@ -47,13 +47,15 @@ async function GetCampStatus(){
 }
 async function UpdateCampStatus(StaffId, StaffRole, Status, ip){
 	await CreateCampStatus();
-	await prisma.campStatus.update({
+	let CampStatus = await prisma.campStatus.update({
 		where: {
 			id: 1,
 		},
 		data: Status,
 	});
 	await Log(StaffId, StaffRole,`Updated camp status from [${ip}]`);
+	delete(CampStatus.id);
+	return CampStatus;
 }
 
 
@@ -235,9 +237,7 @@ async function UpdateProfile(AccountId, NewProfileData){
 			if (New && Existing !== New){
 				ToUpdate[Key] = New;
 			}
-			if (!New){
-				Missing[NewProfileTranslate[Key]] = "Missing data";
-			}
+
 		}
 	}
 	let NewProfile = await prisma.profiles.update({

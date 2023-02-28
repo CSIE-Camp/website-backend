@@ -41,9 +41,6 @@ router.post("/password", AuthenticateTempAccessToken, async (req, res) => {
 	if (!IsValidPassword(password)){
 		return res.status(418).json({message: "Are you a teapot?"});
 	}
-	if (!IsValidEmail(email)){
-		return res.status(400).json({message: "Invalid email"});
-	}
 	if (await FindAccountByEmail(email)){
 		return res.status(403).json({message: "Email has been registered to an account, sign in instead!"});
 	}

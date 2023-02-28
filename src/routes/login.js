@@ -6,10 +6,10 @@ const bcrypt = require("bcrypt");
 const express = require("express");
 const jwt = require("jsonwebtoken");
 
-const { GenerateAccessToken, GenerateRefreshToken, RevokeRefreshToken, GenerateTempAccessToken, RevokeA, RevokeAllRefreshTokens } = require("./../Modules/Tokens");
+const { GenerateAccessToken, GenerateRefreshToken, RevokeRefreshToken, GenerateTempAccessToken, RevokeAllRefreshTokens, FindRefreshToken } = require("./../Modules/Tokens");
 const { IsValidEmail, IsValidString, IsValidPassword } = require("../Modules/Validate");
 
-const { SendPasswordResetEmail } = require("./../Services/EmailService");
+const { SendPasswordResetEmail, SendLoginNotifEmail } = require("./../Services/EmailService");
 
 const { AuthenticateAccessToken, AuthenticateRefreshToken, AuthenticateTempAccessToken } = require("./../Middleware/AuthenticateToken");
 const { FindAccountByEmail, FindPendingAccountByEmail, GetAccountId, UpdateAccountPassword, GetAccountStatus} = require("../Modules/Database");
@@ -17,29 +17,29 @@ const router = express.Router();
 
 //login
 router.post("/", async (req, res) => {
-	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddressw;
+	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 	let email = req.body.email;
 	let password = req.body.password;
 	if (!(IsValidString(email) && IsValidString(password))) {
 		return res.status(400).json({ message: "email or password cannot be null or empty!" });
 	}
 	if (!IsValidEmail(email)) {
-		return res.status(400).json({ message: "Incorrect email or password!" });
+		return res.status(403).json({ message: "Incorrect email or password!" });
 	}
 	if (!IsValidPassword(password)) {
 		return res.status(418).json({ message: "I like green tea to be honest" }); //Not a SHA512 string...Skid or Hacker
 	}
 	if (!await FindAccountByEmail(email)) {
-		return res.status(403).json({ message: "Account does not exist!" });
+		return res.status(401).json({ message: "Account does not exist!" });
 	}
 	try {
 		let Account = await FindAccountByEmail(email);
 		let AccountId = Account.id;
 		if (!await bcrypt.compare(password, Account.Password)) {
-			return res.status(400),json({ message: "Invalid email or password!" });
+			return res.status(403),json({ message: "Invalid email or password!" });
 		}
-		let AccessToken = await GenerateAccessToken(AccountId, Account.Role, ip);
 		let RefreshToken = await GenerateRefreshToken(AccountId, ip);
+		let AccessToken = await GenerateAccessToken(AccountId, Account.Role, ip);
 		let ReturnData = {
 			token: {},
 			Account: {},
@@ -49,6 +49,7 @@ router.post("/", async (req, res) => {
 		ReturnData.token.token_type = "Bearer";
 		ReturnData.Account.Role = Account.Role;
 		ReturnData.Account.Status = await GetAccountStatus(AccountId);
+		await SendLoginNotifEmail(Account.Email, ip);
 		return res.status(200).json(ReturnData);
 	} catch (error) {
 		console.log(error);
@@ -59,9 +60,14 @@ router.post("/", async (req, res) => {
 //refresh access token
 router.post("/refresh", AuthenticateRefreshToken, async (req, res) => {
 	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+	let AccountId = req.UserId;
+	let RefreshTokenId = req.refresh_token_id;
+	if (!await FindRefreshToken(AccountId, RefreshTokenId)){
+		return res.status(401).json({message:"Token does not exist"});
+	}
 	return res.status(200).json({
 		message: "Access token generated",
-		data: {
+		token: {
 			access_token: token,
 			token_type: "bearer",
 		},
@@ -74,7 +80,7 @@ router.post("/password/reset", async (req, res) => {
 	let email = req.body.email;
 	let AccountExists = await FindAccountByEmail(email);
 	if (!AccountExists) {
-		return res.status(200).json({ message: "Please check your email" });
+		return res.status(401).json({ message: "Account not found" });
 	}
 	let ResetMaiLStatus = await SendPasswordResetEmail(email, AccountExists.id, ip);
 	if (!ResetMaiLStatus) {

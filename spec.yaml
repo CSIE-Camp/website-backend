@@ -9,15 +9,19 @@ info:
     - [Camp website](https://camp.csie.cool)
     
   version: 1.0.0-oas3
+
 servers:
   - url: https://server.com
+
 tags:
   - name: Signup
   - name: Login
   - name: Profile
   - name: Admin
+  - name: Home
+
 paths:
-  /signp/email:
+  /signup/email:
     post:
       tags:
         - Signup
@@ -28,19 +32,36 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/signup_email"
+              $ref: "#/components/schemas/request/signup/email"
       responses:
         "200":
           description: >-
             Successfully send verification email. Ask the user to verify their
             email
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/signup/email/Code_200"
         "400":
           description: Password was null or empty
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/signup/email/Code_400"
         "403":
           description: Email is in use
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/signup/email/Code_403"
         "500":
           description: Unexpected errors
-  /signp/password:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/signup/email/Code_500"
+
+  /signup/password:
     post:
       tags:
         - Signup
@@ -57,16 +78,40 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/signup_password"
+              $ref: "#/components/schemas/request/signup/password"
       responses:
         "200":
           description: Successfully created the account. Ask the user to login
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/signup/password/Code_200"
         "400":
           description: Password was null or empty
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/signup/password/Code_400"
+        "403":
+          description: Account exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/signup/password/Code_403"
         "418":
           description: Provided password was not a hex digest of a SHA512 hash
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/signup/password/Code_418"
         "500":
           description: Unexpected errors
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/signup/password/Code_500"
+
+
   /login:
     post:
       tags:
@@ -80,22 +125,44 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/login"
+              $ref: "#/components/schemas/request/login/root_login"
       responses:
         "200":
           description: Ok
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/login_response_success"
+                $ref: "#/components/schemas/response/login/root_login/Code_200"
         "400":
           description: Invalid data
-        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/root_login/Code_400"
+        "401":
           description: Account does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/root_login/Code_201"
+        "403":
+          description: Incorrect email or password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/root_login/Code_403"
         "418":
           description: Password was not a SHA512 hash
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/root_login/Code_418"
         "500":
           description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/root_login/Code_500"
     delete:
       tags:
         - Login
@@ -109,16 +176,29 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/logout"
+              $ref: "#/components/schemas/request/login/root_logout"
       responses:
         "200":
-          description: Ok
+          description: No response body
         "400":
-          description: Invalid data
-        "403":
-          description: Invalid token
+          description: Token is null
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/root_login/Code_400"
         "401":
           description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/root_login/Code_401"
+        "403":
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/root_login/Code_403"
+        
 
   /login/refresh:
     post:
@@ -128,18 +208,20 @@ paths:
       description: Refreshes the access token with refresh token
       requestBody:
         description: >-
-          Submit the refresh token
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/refresh"
+          Submit the refresh token in the header "Authorization" field
       responses:
         "200":
           description: Ok
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/refresh_response_success"
+                $ref: "#/components/schemas/response/login/root_login/Code_200"
+        "401":
+          description: Token does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/root_login/Code_401"
   /login/password/reset:
     post:
       tags:
@@ -152,12 +234,27 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/password-reset"
+              $ref: "#/components/schemas/request/login/password_reset"
       responses:
         "200":
           description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/password_reset/Code_200"
+        "401":
+          description: Account does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/password_reset/Code_401"
         "500":
           description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/password_reset/Code_500"
+
   /login/password/update:
     post:
       tags:
@@ -170,16 +267,35 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/login"
+              $ref: "#/components/schemas/request/login/password_update"
       responses:
         "200":
           description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/password_update/Code_200"
         "400":
           description: Invalid data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/password_update/Code_400"
         "418":
           description: Provided password was not a hex digest of a SHA512 hash
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/password_update/Code_418"
         "500":
           description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/password_update/Code_500"
+
+#Finish below
+
   /admin/view-profile/{id}:
     get:
       tags:
@@ -199,6 +315,7 @@ paths:
           description: Ok
         "401":
           description: Insufficient privileges
+
   /admin/confirm-status:
     post:
       tags:
@@ -219,6 +336,7 @@ paths:
           description: Insufficient privileges
         "400":
           description: Invalid data
+
   /admin/confirm-payment:
     post:
       tags:
@@ -239,6 +357,7 @@ paths:
           description: Insufficient privileges or not enough arguments
         "400":
           description: Invalid data
+
   /admin/update-roles:
     post:
       tags:
@@ -259,6 +378,7 @@ paths:
           description: Not enough arguments
         "403":
           description: Insufficient privileges, invalid role or changing role for self
+
   /admin/view-logs/{TargetAccount}:
     get:
       tags:
@@ -277,6 +397,7 @@ paths:
           description: Ok
         "403":
           description: Insufficient privileges
+
   /admin/get-camp-status:
     get:
       tags:
@@ -290,6 +411,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/camp-status"
+
   /admin/edit-camp-status:
     post:
       tags:
@@ -308,6 +430,7 @@ paths:
           description: Ok
         "403":
           description: Insufficient privileges
+
   /admin/search:
     post:
       tags:
@@ -326,6 +449,8 @@ paths:
           description: Ok
         "403":
           description: Insufficient privileges
+
+
   /profile:
     get:
       tags:
@@ -339,6 +464,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/profile-get"
+
   /profile/update:
     post:
       tags:
@@ -368,164 +494,251 @@ components:
       type: http
       scheme: Bearer
       bearerFormat: JWT
+
   schemas:
-    signup_email:
-      type: object
-      properties:
+    request:
+      signup:
         email:
-          type: string
-          example: test@example.com
-    signup_password:
-      type: object
-      properties:
-        password:
-          type: string
-          example: >-
-            bed4efa1d4fdbd954bd3705d6a2a78270ec9a52ecfbfb010c61862af5c76af1761ffeb1aef6aca1bf5d02b3781aa854fabd2b69c790de74e17ecfec3cb6ac4bf
-    login:
-      type: object
-      properties:
-        email:
-          type: string
-          example: test@example.com
-        password:
-          type: string
-          example: >-
-            bed4efa1d4fdbd954bd3705d6a2a78270ec9a52ecfbfb010c61862af5c76af1761ffeb1aef6aca1bf5d02b3781aa854fabd2b69c790de74e17ecfec3cb6ac4bf
-    login_response_success:
-      type: object
-      properties:
-        access_token:
-          type: string
-        refresh_token:
-          type: string
-        token_type:
-          type: string
-          example: token
-    logout:
-      type: object
-      properties:
-        refresh_token:
-          type: string
-          example: Refresh token
-    refresh:
-      type: object
-      properties:
-        refresh_token:
-          type: string
-    refresh_response_success:
-      type: object
-      properties:
-        access_token:
-          type: string
-    password-reset:
-      type: object
-      properties:
-        email:
-          type: string
-          example: test@example.com
-    id:
-      type: string
-    application-status:
-      type: object
-      properties:
-        TargetAccount:
-          type: string
-        NewStatus:
-          type: integer
-    payment-status:
-      type: object
-      properties:
-        TargetAccount:
-          type: string
-    update-role:
-      type: object
-      properties:
-        TargetAccount:
-          type: string
-        NewRole:
-          type: string
-    new-token:
-      type: object
-      properties:
-        tokens:
           type: object
           properties:
-            access_token:
+            email:
               type: string
-            token_type:
-              type: string
-    camp-status:
-      type: object
-      properties:
-        Example:
-          type: string
-    search:
-      type: object
-      properties:
-        Name:
-          type: string
-    profile-get:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: true
-        profile:
-          $ref: "#/components/schemas/profile"
-    profile:
-      type: object
-      properties:
-        personalId:
-          type: string
-        phoneNumber:
-          type: string
-        parentPhoneNumber:
-          type: string
-        bloodType:
-          type: integer
-        fbLink:
-          type: string
-        foodType:
-          type: integer
-        travelHistory:
-          type: integer
-        gender:
-          type: integer
-        clothesSize:
-          type: integer
-    update-profile-response:
-      type: object
-      properties:
-        StoredData:
-          $ref: "#/components/schemas/profile"
-        InvalidData:
+              example: example@gmail.com
+        password:
           type: object
           properties:
-            personalId:
+            password:
               type: string
-              example: 無效的台灣身份證明文件
-            phoneNumber:
+              example: 9cba73c31ac15d21512382ce6b21e83f8b9fddd31196ff4f54559a8e29add1e3bc4038c86c9bee7512d0d8ea72ec9480580dc677a9f172b46366ecb5198615cc
+      login:
+        root_login:
+          type: object
+          properties:
+            email:
               type: string
-              example: 無效的台灣電話號碼
-            parentPhoneNumber:
+              example: example@gmail.com
+            password:
               type: string
-              example: 無效的台灣電話號碼
-            bloodType:
+              example: 9cba73c31ac15d21512382ce6b21e83f8b9fddd31196ff4f54559a8e29add1e3bc4038c86c9bee7512d0d8ea72ec9480580dc677a9f172b46366ecb5198615cc
+        root_logout:
+          type: object
+          properties:
+            refresh_token:
               type: string
-              example: 無效的血型
-            fbLink:
+        password_reset:
+          type: object
+          properties:
+            email:
               type: string
-              example: temp
-            foodType:
+              example: example@gmail.com
+        password_update:
+          type: object
+          properties:
+            password:
               type: string
-              example: 沒有此選項
-            travelHistory:
-              type: string
-              example: 沒有此選項
-            gender:
-              type: string
-              example: 沒有此選項
-            clothesSize:
-              type: string
-              example: 沒有此選項
+              example: 9cba73c31ac15d21512382ce6b21e83f8b9fddd31196ff4f54559a8e29add1e3bc4038c86c9bee7512d0d8ea72ec9480580dc677a9f172b46366ecb5198615ch
+
+        
+    response:
+      signup:
+        email:
+          Code_200:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Please verify your email
+          Code_400:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Invalid email
+          Code_403:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Email has been registered to an account, sign in instead!
+          Code_500:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Internal server error
+        password:
+          Code_200:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Account Created!
+          Code_400:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Password not provided
+          Code_403:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Email has been registered to an account, sign in instead!
+          Code_418:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Are you a teapot? (Password is not the hex digest of a SHA512 hash, probably tempered)
+          Code_500:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Internal Server Error OR Unexpected error occured! Please try again later!
+      login:
+        root_login:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              Account:
+                type: object
+                properties:
+                  Role:
+                    type: string
+                  Status:
+                    type: object
+                    properties:
+                      Applied:
+                        type: boolean
+                      Profile:
+                        type: boolean
+                      PassedTest:
+                        type: boolean
+                      GitHub:
+                        type: boolean
+          Code_400:
+            type: object
+            properties:
+              message:
+                type: string
+                example: email or password cannot be null or empty
+          Code_401:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Account does not exist
+          Code_403:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Incorrect email or password
+          Code_418:
+            type: object
+            properties:
+              message:
+                type: string
+                example: I like green tea (Tempered password field or password not submitted as hex output of SHA512 digest)
+          Code_500:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unexpected error
+        root_logout:
+          Code_400:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Refresh token cannot be null! OR Token not found!
+          Code_401:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Invalid token"
+          Code_403:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Invalid token
+        refresh:
+          Code_200:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Access token generated
+              token:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+          Code_401:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Token does not exist
+        password_reset:
+          Code_200:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Please check your email
+          Code_401:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Account not found
+          Code_500:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Internal Server Error!
+        password_update:
+          Code_200:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Password updated! Logged out from all other devices
+          Code_400:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Password not provided 
+          Code_418:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Are you a teapot? (tempered data or not hex string of SHA512 digest)
+          Code_500:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Internal server error
