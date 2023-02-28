@@ -10,7 +10,6 @@ info:
   version: 1.0.0-oas3
 servers:
   - url: https://server.com
-  - description: SwaggerHub API Auto Mocking
 tags:
   - name: Signup
   - name: Login
@@ -191,27 +190,27 @@ paths:
           name: id
           required: true
           schema:
-            $ref: "#/components/schemas/profile-id"
+            $ref: "#/components/schemas/id"
           description: >-
-            "null" or accountId
+            "null" or AccountId
       responses:
         "200":
           description: Ok
         "401":
           description: Insufficient privileges
-  /admin/update_profile:
+  /admin/confirm-status:
     post:
       tags:
         - Admin
-      summary: Change target account's status
-      description: Change target account's application and/or payment status
+      summary: Modify application status
+      description: Change target account's application status
       requestBody:
         description: >-
-          Submit target account id, application status and payment status
+          Submit target account id and application status
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/update-profile"
+              $ref: "#/components/schemas/application-status"
       responses:
         "200":
           description: Ok
@@ -219,7 +218,113 @@ paths:
           description: Insufficient privileges
         "400":
           description: Invalid data
-
+  /admin/confirm-payment:
+    post:
+      tags:
+        - Admin
+      summary: Modify payment status
+      description: Change target account's payment status
+      requestBody:
+        description: >-
+          Submit target account id
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/payment-status"
+      responses:
+        "200":
+          description: Ok
+        "401":
+          description: Insufficient privileges or not enough arguments
+        "400":
+          description: Invalid data
+  /admin/update-roles:
+    post:
+      tags:
+        - Admin
+      summary: Promote target account's role
+      description: Promote account to staff or admin
+      requestBody:
+        description:  >-
+          Submit target account id and new role
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/update-role'
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Not enough arguments
+        "403":
+          description: Insufficient privileges, invalid role or changing role for self
+  /admin/view-logs/{TargetAccount}:
+    get:
+      tags:
+        - Admin
+      summary: View logs for account
+      description: Let admins view all logs for an account
+      parameters:
+        - in: path
+          name: TargetAccount
+          required: true
+          schema:
+            $ref: "#/components/schemas/id"
+          description: AccountId
+      responses:
+        "200":
+          description: Ok
+        "403":
+          description: Insufficient privileges
+  /admin/get-camp-status:
+    get:
+      tags:
+        - Admin
+      summary: Get status of camp
+      description: Get status of camp
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/camp-status'
+  /admin/edit-camp-status:
+    post:
+      tags:
+        - Admin
+      summary: Change status of camp
+      description: Change status of camp
+      requestBody:
+        description: >-
+          Submit new status
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/camp-status'
+      responses:
+        "200":
+          description: Ok
+        "403":
+          description: Insufficient privileges
+  /admin/search:
+    post:
+      tags:
+        - Admin
+      summary: Search for participant
+      description: Search for a specific participant's or everyone's data
+      requestBody:
+        description: >-
+          Submit name for specific participant or "" for everyone
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/search'
+      responses:
+        "200":
+          description: Ok
+        "403":
+          description: Insufficient privileges
 components:
   securitySchemes:
     bearerAuth:
@@ -282,17 +387,44 @@ components:
         email:
           type: string
           example: test@example.com
-    profile-id:
-      type: object
-      properties:
-        accountId:
-          type: string
-    update-profile:
+    id:
+      type: string
+    application-status:
       type: object
       properties:
         TargetAccount:
           type: string
-        ApplicationStatus:
+        NewStatus:
           type: integer
-        PaymentStatus:
-          type: integer
+    payment-status:
+      type: object
+      properties:
+        TargetAccount:
+          type: string
+    update-role:
+      type: object
+      properties:
+        TargetAccount:
+          type: string
+        NewRole:
+          type: string
+    new-token:
+      type: object
+      properties:
+        tokens:
+          type: object
+          properties:
+            access_token:
+              type: string
+            token_type:
+              type: string
+    camp-status:
+      type: object
+      properties:
+        Status:
+          type: string
+    search:
+      type: object
+      properties:
+        Name: 
+          type: string
