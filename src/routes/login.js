@@ -6,7 +6,7 @@ const bcrypt = require("bcrypt");
 const express = require("express");
 const jwt = require("jsonwebtoken");
 
-const { GenerateAccessToken, GenerateRefreshToken, RevokeRefreshToken, GenerateTempAccessToken } = require("./../Modules/Tokens");
+const { GenerateAccessToken, GenerateRefreshToken, RevokeRefreshToken, GenerateTempAccessToken, RevokeA } = require("./../Modules/Tokens");
 const { IsValidEmail, IsValidString, IsValidPassword } = require("../Modules/Validate");
 
 const { SendPasswordResetEmail } = require("./../Services/EmailService");
@@ -108,28 +108,27 @@ router.get("/password/reset/:token", async (req, res) => {
 //reset password post
 router.post("/password/update", AuthenticateTempAccessToken, async (req, res) => {
 	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-	let NewPassword = req.body.password;
-	let Email = req.email;
-	if (!(NewPassword && IsValidString(NewPassword))){
-		return res.status(400).json({message: "Invalid password or null"});
+	let email = req.email;
+	let password = req.body.password;
+	if (!(password && IsValidString(password))){
+		return res.status(400).json({message: "Password not provided"});
 	}
-	if (!IsValidPassword(NewPassword)){
-		return res.status(418).json({message: "TEAPOT!!!"});
+	if (!IsValidPassword(password)){
+		return res.status(418).json({message: "Are you a teapot?"});
 	}
-	try{
-		let AccountId = await GetAccountId(Email);
-		if (!AccountId){
-			return res.status(500).json({message: "Internal server error"});
+	if (!IsValidEmail(email)){
+		return res.status(400).json({message: "Invalid email"});
+	}
+	try {
+		let hashed = await bcrypt.hash(password, SALTROUNDS);
+		let status = await UpdateAccountPassword(email, hashed);
+		if (status){
+			return res.status(200).json({message: "Password Updated!"});
 		}
-		let hashed = bcrypt.hash(NewPassword, SALTROUNDS);
-		let Status = await UpdateAccountPassword(AccountId, hashed);
-		if (!Status){
-			return res.status(500).json({message: "Internal server error"});
-		}
-		RefreshAllRefreshTokens(AccountId);
-		return res.status(200).json({message: "Password successfully changed. Please log in again!"});
-	} catch(error){
-		
+		return res.status(500),json({message: "Internal Server Error"});
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({message: "Unexpected error occured! Please try again later!"});
 	}
 });
 

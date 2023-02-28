@@ -1,6 +1,6 @@
 const { TimeSeriesBucketTimestamp } = require("redis");
 const { HERMES_MAIL_TOKEN } = require("../config");
-const { GenerateEmailToken } = require("./../Modules/Tokens");
+const { GenerateEmailToken, GeneratePasswordResetToken} = require("./../Modules/Tokens");
 
 async function SendMail(Receipient, Data){
 	let res = await fetch("https://hermes.csie.cool/api/send", {
@@ -60,7 +60,8 @@ async function SendPasswordResetEmail(email, UserId, ip){
 		body: `You have requested a password change at ${ip}, please ignore if IP address does not match up with yours`,
 		link: `Reset Password,http://${token}`,
 	};
-	return await SendMail(email, Data);
+	let Status = await SendMail(email, Data);
+	return Status;
 }
 
 async function SendLoginNotifEmail(email, ip){

@@ -156,4 +156,4 @@ router.post("/confirm-payment", AuthenticateAccessToken, async (req, res) => {
 	return res.status(200).json(ReturnData);
 });
 
-return router;
+module.exports = router;

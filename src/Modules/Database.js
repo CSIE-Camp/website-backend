@@ -86,15 +86,20 @@ async function UpdateAccountEmail(Email) {
 	return UserRecord;
 }
 
-async function UpdateAccountPassword(userid, password) {
+async function UpdateAccountPassword(Email, password) {
+	let Account = await FindAccountByEmail(Email);
+	if (!Account){
+		return false;
+	}
 	let UserRecord = await prisma.accounts.update({
 		where: {
-			id: userid,
+			id: Account.id,
 		},
 		data: {
 			Password: password,
 		},
 	});
+	return true;
 }
 
 async function GetAccountId(Email){

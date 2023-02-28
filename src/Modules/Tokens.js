@@ -69,7 +69,7 @@ async function GeneratePasswordResetToken(email, userid) {
 			expiresIn: RESET_PASSWORD_EXPIRE,
 		},
 	);
-	return `${CLIENT_URL}/login/password-reset/${token}`;
+	return `${CLIENT_URL}/login/password/reset/${token}`;
 }
 
 async function GetRefreshTokens(AccountId){
@@ -182,5 +182,6 @@ module.exports = {
 	GeneratePasswordResetToken: GeneratePasswordResetToken,
 	GenerateTempAccessToken: GenerateTempAccessToken,
 	FindRefreshToken: FindRefreshToken,
+	RevokeAllRefreshTokens: RevokeAllRefreshTokens,
 	CompareRoles: CompareRoles,
 };
