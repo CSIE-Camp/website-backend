@@ -3,18 +3,19 @@ info:
   title: NTNU CSIE Camp API Documentation
   description: |-
     NTNU CSIE Camp API documentation
-
+    Note: Please remember to check for "token" in all response body. a new access_token will be returned IF the user's role has been changed while logged in.
     Some useful links:
     - [Backend repository](https://github.com/CSIE-Camp/website-backend)
     - [Camp website](https://camp.csie.cool)
+    
   version: 1.0.0-oas3
 servers:
-    - url: https://server.com
-        description: SwaggerHub API Auto Mocking
+  - url: https://server.com
 tags:
   - name: Signup
   - name: Login
   - name: Profile
+  - name: Admin
 paths:
   /signp/email:
     post:
@@ -27,17 +28,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/signup_email'
+              $ref: "#/components/schemas/signup_email"
       responses:
-        '200':
+        "200":
           description: >-
             Successfully send verification email. Ask the user to verify their
             email
-        '400':
+        "400":
           description: Password was null or empty
-        '403':
+        "403":
           description: Email is in use
-        '500':
+        "500":
           description: Unexpected errors
   /signp/password:
     post:
@@ -56,15 +57,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/signup_password'
+              $ref: "#/components/schemas/signup_password"
       responses:
-        '200':
+        "200":
           description: Successfully created the account. Ask the user to login
-        '400':
+        "400":
           description: Password was null or empty
-        '418':
+        "418":
           description: Provided password was not a hex digest of a SHA512 hash
-        '500':
+        "500":
           description: Unexpected errors
   /login:
     post:
@@ -79,21 +80,21 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/login'
+              $ref: "#/components/schemas/login"
       responses:
-        '200':
+        "200":
           description: Ok
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/login_response_success'
-        '400':
+                $ref: "#/components/schemas/login_response_success"
+        "400":
           description: Invalid data
-        '403':
+        "403":
           description: Account does not exist
-        '418':
+        "418":
           description: Password was not a SHA512 hash
-        '500':
+        "500":
           description: Unexpected error
     delete:
       tags:
@@ -108,17 +109,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/logout'
+              $ref: "#/components/schemas/logout"
       responses:
-        '200':
+        "200":
           description: Ok
-        '400':
+        "400":
           description: Invalid data
-        '403':
+        "403":
           description: Invalid token
-        '401':
+        "401":
           description: Invalid token
-        
+
   /login/refresh:
     post:
       tags:
@@ -129,17 +130,17 @@ paths:
         description: >-
           Submit the refresh token
         content:
-         application/json:
-           schema:
-             $ref: '#/components/schemas/refresh'
-      responses: 
-        '200':
+          application/json:
+            schema:
+              $ref: "#/components/schemas/refresh"
+      responses:
+        "200":
           description: Ok
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/refresh_response_success'
-  /login/password-reset:
+                $ref: "#/components/schemas/refresh_response_success"
+  /login/password/reset:
     post:
       tags:
         - Login
@@ -151,13 +152,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/password-reset'
+              $ref: "#/components/schemas/password-reset"
       responses:
-        '200':
+        "200":
           description: Ok
-        '500':
+        "500":
           description: Unexpected error
-  /login/update-password:
+  /login/password/update:
     post:
       tags:
         - Login
@@ -169,16 +170,198 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/login'
+              $ref: "#/components/schemas/login"
       responses:
-        '200':
+        "200":
           description: Ok
-        '400':
+        "400":
           description: Invalid data
-        '418':
+        "418":
           description: Provided password was not a hex digest of a SHA512 hash
-        '500':
+        "500":
           description: Unexpected error
+  /admin/view-profile/{id}:
+    get:
+      tags:
+        - Admin
+      summary: Go to users' profile
+      description: Goes to requested users profile if you are an admin
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: "#/components/schemas/id"
+          description: >-
+            "null" or AccountId
+      responses:
+        "200":
+          description: Ok
+        "401":
+          description: Insufficient privileges
+  /admin/confirm-status:
+    post:
+      tags:
+        - Admin
+      summary: Modify application status
+      description: Change target account's application status
+      requestBody:
+        description: >-
+          Submit target account id and application status
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/application-status"
+      responses:
+        "200":
+          description: Ok
+        "401":
+          description: Insufficient privileges
+        "400":
+          description: Invalid data
+  /admin/confirm-payment:
+    post:
+      tags:
+        - Admin
+      summary: Modify payment status
+      description: Change target account's payment status
+      requestBody:
+        description: >-
+          Submit target account id
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/payment-status"
+      responses:
+        "200":
+          description: Ok
+        "401":
+          description: Insufficient privileges or not enough arguments
+        "400":
+          description: Invalid data
+  /admin/update-roles:
+    post:
+      tags:
+        - Admin
+      summary: Promote target account's role
+      description: Promote account to staff or admin
+      requestBody:
+        description: >-
+          Submit target account id and new role
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/update-role"
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Not enough arguments
+        "403":
+          description: Insufficient privileges, invalid role or changing role for self
+  /admin/view-logs/{TargetAccount}:
+    get:
+      tags:
+        - Admin
+      summary: View logs for account
+      description: Let admins view all logs for an account
+      parameters:
+        - in: path
+          name: TargetAccount
+          required: true
+          schema:
+            $ref: "#/components/schemas/id"
+          description: AccountId
+      responses:
+        "200":
+          description: Ok
+        "403":
+          description: Insufficient privileges
+  /admin/get-camp-status:
+    get:
+      tags:
+        - Admin
+      summary: Get status of camp
+      description: Get status of camp
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/camp-status"
+  /admin/edit-camp-status:
+    post:
+      tags:
+        - Admin
+      summary: Change status of camp
+      description: Change status of camp
+      requestBody:
+        description: >-
+          Submit new status
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/camp-status"
+      responses:
+        "200":
+          description: Ok
+        "403":
+          description: Insufficient privileges
+  /admin/search:
+    post:
+      tags:
+        - Admin
+      summary: Search for participant
+      description: Search for a specific participant's or everyone's data
+      requestBody:
+        description: >-
+          Submit name for specific participant or "" for everyone
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/search"
+      responses:
+        "200":
+          description: Ok
+        "403":
+          description: Insufficient privileges
+  /profile:
+    get:
+      tags:
+        - Profile
+      summary: Get users profile
+      description: Get profile of the user themself
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/profile-get"
+  /profile/update:
+    post:
+      tags:
+        - Profile
+      summary: Updates user's profile
+      description: Submit new profile to update
+      requestBody:
+        description: >-
+          Submit profile
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/profile"
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/update-profile-response"
+        "403":
+          description: Application service unavailable
+
 components:
   securitySchemes:
     bearerAuth:
@@ -241,3 +424,108 @@ components:
         email:
           type: string
           example: test@example.com
+    id:
+      type: string
+    application-status:
+      type: object
+      properties:
+        TargetAccount:
+          type: string
+        NewStatus:
+          type: integer
+    payment-status:
+      type: object
+      properties:
+        TargetAccount:
+          type: string
+    update-role:
+      type: object
+      properties:
+        TargetAccount:
+          type: string
+        NewRole:
+          type: string
+    new-token:
+      type: object
+      properties:
+        tokens:
+          type: object
+          properties:
+            access_token:
+              type: string
+            token_type:
+              type: string
+    camp-status:
+      type: object
+      properties:
+        Example:
+          type: string
+    search:
+      type: object
+      properties:
+        Name:
+          type: string
+    profile-get:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        profile:
+          $ref: "#/components/schemas/profile"
+    profile:
+      type: object
+      properties:
+        personalId:
+          type: string
+        phoneNumber:
+          type: string
+        parentPhoneNumber:
+          type: string
+        bloodType:
+          type: integer
+        fbLink:
+          type: string
+        foodType:
+          type: integer
+        travelHistory:
+          type: integer
+        gender:
+          type: integer
+        clothesSize:
+          type: integer
+    update-profile-response:
+      type: object
+      properties:
+        StoredData:
+          $ref: "#/components/schemas/profile"
+        InvalidData:
+          type: object
+          properties:
+            personalId:
+              type: string
+              example: 無效的台灣身份證明文件
+            phoneNumber:
+              type: string
+              example: 無效的台灣電話號碼
+            parentPhoneNumber:
+              type: string
+              example: 無效的台灣電話號碼
+            bloodType:
+              type: string
+              example: 無效的血型
+            fbLink:
+              type: string
+              example: temp
+            foodType:
+              type: string
+              example: 沒有此選項
+            travelHistory:
+              type: string
+              example: 沒有此選項
+            gender:
+              type: string
+              example: 沒有此選項
+            clothesSize:
+              type: string
+              example: 沒有此選項
