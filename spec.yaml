@@ -245,12 +245,12 @@ paths:
       summary: Promote target account's role
       description: Promote account to staff or admin
       requestBody:
-        description:  >-
+        description: >-
           Submit target account id and new role
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/update-role'
+              $ref: "#/components/schemas/update-role"
       responses:
         "200":
           description: Ok
@@ -288,7 +288,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/camp-status'
+                $ref: "#/components/schemas/camp-status"
   /admin/edit-camp-status:
     post:
       tags:
@@ -301,7 +301,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/camp-status'
+              $ref: "#/components/schemas/camp-status"
       responses:
         "200":
           description: Ok
@@ -319,12 +319,48 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/search'
+              $ref: "#/components/schemas/search"
       responses:
         "200":
           description: Ok
         "403":
           description: Insufficient privileges
+  /profile:
+    get:
+      tags:
+        - Profile
+      summary: Get users profile
+      description: Get profile of the user themself
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/profile-get"
+  /profile/update:
+    post:
+      tags:
+        - Profile
+      summary: Updates user's profile
+      description: Submit new profile to update
+      requestBody:
+        description: >-
+          Submit profile
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/profile"
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/update-profile-response"
+        "403":
+          description: Application service unavailable
+
 components:
   securitySchemes:
     bearerAuth:
@@ -421,10 +457,74 @@ components:
     camp-status:
       type: object
       properties:
-        Status:
+        Example:
           type: string
     search:
       type: object
       properties:
-        Name: 
+        Name:
           type: string
+    profile-get:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        profile:
+          $ref: "#/components/schemas/profile"
+    profile:
+      type: object
+      properties:
+        personalId:
+          type: string
+        phoneNumber:
+          type: string
+        parentPhoneNumber:
+          type: string
+        bloodType:
+          type: integer
+        fbLink:
+          type: string
+        foodType:
+          type: integer
+        travelHistory:
+          type: integer
+        gender:
+          type: integer
+        clothesSize:
+          type: integer
+    update-profile-response:
+      type: object
+      properties:
+        StoredData:
+          $ref: "#/components/schemas/profile"
+        InvalidData:
+          type: object
+          properties:
+            personalId:
+              type: string
+              example: 無效的台灣身份證明文件
+            phoneNumber:
+              type: string
+              example: 無效的台灣電話號碼
+            parentPhoneNumber:
+              type: string
+              example: 無效的台灣電話號碼
+            bloodType:
+              type: string
+              example: 無效的血型
+            fbLink:
+              type: string
+              example: temp
+            foodType:
+              type: string
+              example: 沒有此選項
+            travelHistory:
+              type: string
+              example: 沒有此選項
+            gender:
+              type: string
+              example: 沒有此選項
+            clothesSize:
+              type: string
+              example: 沒有此選項
