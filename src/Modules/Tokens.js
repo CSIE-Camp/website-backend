@@ -1,6 +1,6 @@
 const { ACCESS_TOKEN_EXPIRE, ACCESS_TOKEN_SECRET, REFRESH_TOKEN_EXPIRE, REFRESH_TOKEN_SECRET, EMAIL_TOKEN_SECRET, EMAIL_TOKEN_EXPIRE, MAX_REFRESH_TOKENS, RESET_PASSWORD_SECRET, RESET_PASSWORD_EXPIRE, TEMP_ACCESS_SECRET, TEMP_ACCESS_EXPIRE, CLIENT_URL } = require("./../config");
 
-const { GetStoredRefreshTokens, AddStoredRefreshTokens, RevokeStoredRefreshToken, RevokeAllStoredRefreshTokens} = require("./Database");
+const { GetStoredRefreshTokens, AddStoredRefreshTokens, RevokeStoredRefreshToken, RevokeAllStoredRefreshTokens, FindAccountById} = require("./Database");
 const { randomBytes, randomUUID } = require("crypto");
 const jwt = require("jsonwebtoken");
 const redis = require("redis");
@@ -30,6 +30,15 @@ async function GenerateAccessToken(userid, Role,  ip) {
 		},
 	);
 	return token;
+}
+
+async function CompareRoles(AccountId, CurrentRole, ip){
+	let Account = await FindAccountById(AccountId);
+	if (Account.Role === CurrentRole){
+		return;
+	}
+	let NewToken = GenerateAccessToken(AccountId, Account.Role, ip);
+	return NewToken;
 }
 
 async function GenerateEmailToken(email) {
@@ -102,7 +111,6 @@ async function RevokeOldestRefreshToken(AccountId, Tokens){
 		console.error(err);
 	});
 	await RevokeStoredRefreshToken(AccountId, TokenId);
-	console.log(`Revoked token with id ${TokenId}`);
 	return Tokens;
 }
 
@@ -118,7 +126,6 @@ async function UpdateRefreshTokens(AccountId, Tokens, TokenId, Token, TimeStamp)
 		console.error(err);
 	});
 	await AddStoredRefreshTokens(AccountId, TokenId, Token, TimeStamp);
-	console.warn(`Current records: ${Object.keys(Tokens).length}`);
 	return;
 }
 
@@ -175,4 +182,5 @@ module.exports = {
 	GeneratePasswordResetToken: GeneratePasswordResetToken,
 	GenerateTempAccessToken: GenerateTempAccessToken,
 	FindRefreshToken: FindRefreshToken,
+	CompareRoles: CompareRoles,
 };

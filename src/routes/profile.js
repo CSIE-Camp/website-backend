@@ -1,5 +1,5 @@
 const { AuthenticateAccessToken } = require("./../Middleware/AuthenticateToken");
-const { FindProfile, UpdateProfile } = require("./../Modules/Database");
+const { FindProfile, UpdateProfile, GetCampStatus } = require("./../Modules/Database");
 const { ValidateDocuments, IsValidNumber, IsValidFacebookUrl, IsValidBloodType } = require("./../Modules/Validate");
 
 const express = require("express");
@@ -12,11 +12,11 @@ const router = express.Router();
 
 const storage = multer.diskStorage({
 	destination: (req, file, cb) => {
-		cb(null, path.join(__dirname, "..", "uploads", "images"));
+		cb(null, path.join(__dirname, "..", "Uploads", "Images"));
 	},
 	filename: (req, file, cb) => {
 		let img = crypto.randomBytes(16).toString("hex") + path.extname(file.originalname);
-		req.imagepath = `${path.join(__dirname, "..", "uploads", "images")}/${img}`;
+		req.imagepath = `${path.join(__dirname, "..", "Uploads", "Images")}/${img}`;
 		cb(null, img);
 	},
 });
@@ -42,74 +42,105 @@ router.get("/", AuthenticateAccessToken, async (req, res) => {
 	return res.status(200).json({ success: true, profile });
 });
 
-router.post("/update"/*, AuthenticateAccessToken*/, upload.single("selfPicture"), async (req, res) => {
+async function RemoveImage(Path){
+	fs.unlink(Path, (err)=> {
+		if (err) {
+			console.log(err);
+		}
+		return;
+	});
+}
+
+router.post("/update", AuthenticateAccessToken, upload.single("selfPicture"), async (req, res) => {
 	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-	let profile = req.body;
-	let ImagePath = req.imagepath;
-	console.log(ImagePath);
-	let UserId = "clemwblys0000slpov5m5ad74"; //req.userid;
-	let doc_flag = false;
-	if (profile.id || profile.AccountId) {
-		if (ImagePath){
-			fs.unlink(ImagePath, (err) => {
-				if (err){
-					console.error(err);
-				}
-			});
+	let Profile = req.body;
+	Profile.ImagePath = req.imagepath;
+	let AccountId = req.userid;
+	let Flags = {};
+	let CampStatus = await GetCampStatus();
+	if (!CampStatus.AllowRegistration){
+		RemoveImage(Profile.ImagePath);
+		return res.status(403).json({message: "Registration has not started"});
+	}
+	let CurrentTimeStamp = Date.now();
+	let DeadlineTimeStamp = Number(CampStatus.Apply_Deadline_TimeStamp);
+	if (CurrentTimeStamp > DeadlineTimeStamp){
+		RemoveImage(Profile.ImagePath);
+		return res.status(403).json({message: `You're ${CurrentTimeStamp - DeadlineTimeStamp} seconds late :<`});
+	}
+	if (Profile.id || Profile.AccountId) {
+		if (Profile.ImagePath){
+			RemoveImage(Profile.ImagePath);
 		}
 		return res.status(403).json({ message: "Well...at least you tried" });
 	}
-	/*
-		name
-		gender
-		school
-		birthDate
-		personalId
-		phoneNumber
-		bloodType
-		fbLink
-		parentName
-		relation
-		parentPhoneNumber
-		travelHistory
-		foodType
-		allergySource
-		disease
-		clothesSize
-		selfIntro
-		motivation
-		selfPicture
-		lanlearned
-		lanMaster
-	*/
-	if (profile.ID_Documents){
-		let {success, doc} = ValidateDocuments(profile.ID_Documents);
-		doc_flag = success;
-		profile.ID_Documents = doc;
-	}
-	if (profile.Number){
-		if (!IsValidNumber(profile.Number)){
-			profile.Number = null;
+	if (Profile.personalId){
+		let DocType = ValidateDocuments(Profile.personalId);
+		Profile.personalId = DocType;
+		if (DocType.split("|")[0] === "Unknown"){
+			Flags.personalId = "無效的台灣身份證明文件";
 		}
 	}
-	if (profile.Emergency_ContactNumber){
-		if (!IsValidNumber(profile.Emergency_ContactNumber)){
-			profile.Emergency_ContactNumber = null;
+	if (Profile.phoneNumber || Profile.parentPhoneNumber){
+		if (Profile.phoneNumber && !IsValidNumber(Profile.phoneNumber)){
+			delete(Profile.phoneNumber);
+			Flags.phoneNumber = "無效的台灣電話號碼";
+		}
+		if (Profile.parentPhoneNumber && !IsValidNumber(Profile.parentPhoneNumber)){
+			delete(Profile.parentPhoneNumber);
+			Flags.parentPhoneNumber = "無效的台灣電話號碼!";
 		}
 	}
-	if (profile.Emergency_BloodType){
-		if (!IsValidBloodType(profile.Emergency_BloodType)){
-			profile.Emergency_BloodType = null;
+	if (Profile.bloodType){
+		let BloodType = IsValidBloodType(Profile.bloodType);
+		if (!BloodType){
+			delete(Profile.bloodType);
+			Flags.bloodType = "無效的血型";
+		} else {
+			Profile.bloodType = BloodType;
 		}
 	}
-	if (profile.Facebook){
-		if (!IsValidFacebookUrl(profile.Facebook)){
-			profile.Facebook = null;
+	if (Profile.fbLink){
+		if (!IsValidFacebookUrl(Profile.fbLink)){
+			delete(Profile.fbLink);
 		}
 	}
-	await UpdateProfile(UserId, profile);
-
-	return res.status(200).json({ message: "Profile updated" });
+	if (Profile.foodType){
+		if (Profile.foodType !== "1" && Profile.foodType !== "2"){
+			delete(Profile.foodType);
+			Flags.foodType = "沒有此選項";
+		} else {
+			Profile.foodType = Profile.foodType === "1" ? "葷食" : "素食";
+		}
+	}
+	if (Profile.travelHistory){
+		if (Profile.travelHistory !== "1" && Profile.travelHistory !== "2"){
+			delete(Profile.travelHistory);
+			Flags.travelHistory = "沒有此選項";
+		} else {
+			Profile.travelHistory = Profile.travelHistory === "1" ? true : false;
+		}
+	}
+	if (Profile.gender){
+		if (Profile.gender !== "1" && Profile.gender !== "2"){
+			delete(Profile.gender);
+			Flags.gender = "沒有此選項";
+		} else {
+			Profile.gender = Profile.gender === "1" ? "Male" : "Female";
+		}
+	}
+	if (Profile.clothesSize){
+		let Size = Number(Profile.clothesSize);
+		if (Size < 1 || Size > 5){
+			delete(Profile.clothesSize);
+			Flags.clothesSize = "沒有此選項";
+		} else {
+			const AvailableSizes = ["XS", "S", "M", "L", "XL"];
+			Profile.clothesSize = AvailableSizes[Size - 1];
+		}
+	}
+	let Status = await UpdateProfile(AccountId, Profile);
+	return res.status(200).json({ StoredData: Status, InvalidData: Flags});
 });
 
 module.exports = router;

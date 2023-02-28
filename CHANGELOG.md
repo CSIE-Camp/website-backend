@@ -251,3 +251,14 @@
 
  **Removed**
  
+
+ ### 2023-02-28 09:30 (Maxx) ###
+ **Added**
+ - /home
+ - new API endpoints
+ - Most request bodies will now return a new access token IF the user's roles are changed
+ 
+ **Removed**
+ - Health
+ - Liver
+ - Will to live 

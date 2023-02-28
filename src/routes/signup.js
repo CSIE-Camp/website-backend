@@ -54,7 +54,6 @@ router.post("/password", AuthenticateTempAccessToken, async (req, res) => {
 			return res.status(200).json({message: "Account created!"});
 		}
 		return res.status(500),json({message: "Internal Server Error"});
-		//CreateAccount(Email, Password, CreatedAt)
 	} catch (error) {
 		console.error(error);
 		return res.status(500).json({message: "Unexpected error occured! Please try again later!"});

@@ -11,6 +11,7 @@ const app = express();
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 
+const home = require("./routes/home");
 const index = require("./routes/index");
 const login = require("./routes/login");
 const admin = require("./routes/admin");
@@ -24,6 +25,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/", index);
+app.use("/home", home);
 app.use("/login", login);
 app.use("/admin", admin);
 app.use("/signup", signup);

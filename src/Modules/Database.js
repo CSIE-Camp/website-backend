@@ -14,6 +14,49 @@ async function Log(AccountId, AccountType, Details){
 	return;
 }
 
+async function CreateCampStatus(){
+	let Records = await prisma.campStatus.findMany();
+	let Keys = Object.keys(Records).length;
+	if (Keys == 1){
+		return Records;
+	}
+	if (Keys > 1){
+		await prisma.campStatus.deleteMany();
+	}
+	let NewRecord = await prisma.campStatus.create({
+		data: {
+			id: 1,
+		},
+	});
+	return NewRecord;
+}
+
+async function GetCampStatus(){
+	let Status = await prisma.campStatus.findUnique({
+		where: {
+			id: 1,
+		},
+	});
+	if (!Status){
+		let Status = CreateCampStatus();
+		delete(Status.id);
+		return Status;
+	}
+	delete(Status.id);
+	return Status;
+}
+async function UpdateCampStatus(StaffId, StaffRole, Status, ip){
+	await CreateCampStatus();
+	await prisma.campStatus.update({
+		where: {
+			id: 1,
+		},
+		data: Status,
+	});
+	await Log(StaffId, StaffRole,`Updated camp status from [${ip}]`);
+}
+
+
 async function CreateAccount(Email, HashedPassword) {
 	let Account = await prisma.accounts.create({
 		data: {
@@ -142,36 +185,59 @@ async function FindProfile(id) {
 	return Profile;
 }
 
-async function UpdateProfile(AccountId, data) {
-	let Profile = await FindProfile(AccountId);
-	let Remove = [];
-	for (let key in Profile) {
-		if (!Profile[key] && !data[key]) {
-			Remove.push(key);
+const NewProfileTranslate = {
+	"Name" : "name",
+	"Gender" : "gender",
+	"School" : "school",
+	"BirthDate" : "birthDate",
+	"ID_Document" : "personalId",
+	"PhoneNumber" : "phoneNumber",
+	"Emergency_BloodType" : "bloodType",
+	"Facebook" : "fbLink",
+	"Emergency_ContactName" : "parentName",
+	"Emergency_ContactRelationship" : "relation",
+	"Emergency_ContactNumber" : "parentPhoneNumber",
+	"TravelHistory" : "travelHistory",
+	"FoodType" : "foodType",
+	"AllergySource" : "allergySource",
+	"Diseases" : "disease",
+	"ClothesSize" : "clothesSize",
+	"SelfIntro" : "selfIntro",
+	"Motivation" : "motivation",
+	"PicturePath" : "selfPicture",
+	"Lang_Leanred" : "lanlearned",
+	"Lang_Mastered" : "lanMaster",
+};
+
+async function UpdateProfile(AccountId, NewProfileData){
+	let ExistingProfile = await FindProfile(AccountId);
+	let ExistingKeys = Object.keys(ExistingProfile);
+	let ToUpdate = {};
+	let PersonalId = NewProfileData["personalId"];
+	if (PersonalId){
+		ToUpdate.ID_Validated = PersonalId.split("|")[0] !== "Unknown" ? true : false;
+	}
+	for (let i = 0; i < ExistingKeys.length; i++){
+		let Key = ExistingKeys[i];
+		if (Key == "ConsentFormPath"){
 			continue;
 		}
-		if (Profile[key] && data[key]) {
-			if (Profile[key] === data[key]) {
-				Remove.push(key);
-				continue;
+		if (NewProfileData[NewProfileTranslate[Key]]){
+			let Existing = ExistingProfile[Key];
+			let New = NewProfileData[NewProfileTranslate[Key]];
+			if (New && Existing !== New){
+				ToUpdate[Key] = New;
 			}
-			Profile[key] = data[key];
 		}
-		Profile[key] = data[key];
-	}
-	for (let i = 0; i < Remove.length; i++){
-		delete(Profile[Remove[i]]);
 	}
 	let NewProfile = await prisma.profiles.update({
 		where: {
 			AccountId: AccountId,
 		},
-		data: Profile,
+		data: ToUpdate,
 	});
-	delete (Profile.id);
-	delete(Profile.Validated_ID);
-	delete(Profile.Unvalidate_ID);
-	delete (Profile.AccountId);
+	delete(NewProfile.id);
+	delete(NewProfile.AccountId);
 	return NewProfile;
 }
 
@@ -187,9 +253,9 @@ async function GetPaymentDetails(AccountId){
 }
 
 
-async function UpdatePaymentData(AccountId, TransferDate, AccountName, Last5Digits){
+async function UpdatePaymentData(AccountId, {TransferDate, AccountName, Account_Last5Digits}){
 	let Account = await FindAccountById(AccountId);
-	if (!Account.Accepted){
+	if (!(Account.StatusStatus == "ACCEPTED" || Account.Status == "WAITLIST_ACCEPTED")){
 		return false;
 	}
 	let PaymentData = await prisma.paymentDetails.update({
@@ -199,10 +265,10 @@ async function UpdatePaymentData(AccountId, TransferDate, AccountName, Last5Digi
 		data: {
 			TransferDate: TransferDate,
 			AccountName: AccountName,
-			Account_Last5Digits: Last5Digits,
+			Account_Last5Digits: Account_Last5Digits,
 		},
 	});
-	return PaymentData;
+	return true;
 }
 
 
@@ -290,7 +356,7 @@ async function ConfirmPaymentStatus(StaffId, StaffRole, AccountId, ip){
 	return [true, "success"];
 }
 
-async function AdminViewProfile(TargetId, {AccountId, AccountRole}){
+async function AdminViewProfile(TargetId, AccountId, AccountRole){
 	let ReturnData = {
 		Account: {},
 	};
@@ -423,8 +489,104 @@ async function GetLogs(AccountId, AccountRole, TargetAccount, ip){
 	return Logs;
 }
 
+async function GetAccountStatus(AccountId){
+	let Profile = FindProfile(AccountId);
+	let Account = FindAccountById(AccountId);
+	let Keys = Object.keys(Profile);
+	let ReturnData = {
+		Applied: Account.Applied,
+		Profile: true,
+		PassedTest: Account.PassedTest,
+		GitHub: Account.GitHub ? true : false,
+	};
+	for (let i = 0; i < Keys.length; i++){
+		let Key = Keys[i];
+		if (!Profile[Key]){
+			ReturnData.Profile = false;
+		}
+	}
+	return ReturnData;
+}
+
+async function ApplyToCamp(AccountId, Status){
+	await prisma.accounts.update({
+		where: {
+			id: AccountId,
+		},
+		data: {
+			Applied: Status,
+		},
+	});
+	return;
+}
+
+async function UploadConsentForm(AccountId, Path){
+	await prisma.profiles.update({
+		where: {
+			AccountId: AccountId,
+		},
+		data: {
+			ConsentFormPath: Path,
+		},
+	});
+	return;
+}
+
+async function CompleteTest(AccountId){
+	await prisma.accounts.update({
+		where: {
+			id: AccountId,
+		},
+		data: {
+			PassedTest: true,
+		},
+	});
+	return;
+}
+
+async function EditPoints(AccountId, Points){
+	let Account = await FindAccountById(AccountId);
+	let CurrentPoints = Account.Points;
+	let NewPoints = CurrentPoints += Points;
+	let NewRecord = await prisma.accounts.update({
+		where: {
+			id: AccountId,
+		},
+		data: {
+			Points: NewPoints,
+		},
+	});
+	return NewRecord.Points;
+}
+
+async function FindDataByName(Name){
+	let Records = await prisma.profiles.findMany({
+		where: {
+			Name: Name,
+		},
+	});
+	if (Object.keys(Records).length == 0){
+		return "Not found";
+	}
+	let ReturnData = {};
+	for (let i = 0; i < Object.keys(Records).length; i++){
+		let Profile = Records[i];
+		let Account = await FindAccountById(Profile.AccountId);
+		let PaymentData = await GetPaymentDetails(Profile.AccountId);
+		ReturnData[Profile.AccountId] = {
+			Profile: Profile,
+			Account: Account,
+			PaymentData: PaymentData,
+		};
+	}
+	return ReturnData;
+}
+
 module.exports = {
 	Log: Log,
+
+	GetCampStatus: GetCampStatus,
+	UpdateCampStatus: UpdateCampStatus,
 
 	CreateAccount: CreateAccount,
 	UpdateAccountEmail: UpdateAccountEmail,
@@ -454,4 +616,10 @@ module.exports = {
 
 	UpdateAccountRoles: UpdateAccountRoles,
 	GetLogs: GetLogs,
+
+	GetAccountStatus: GetAccountStatus,
+	ApplyToCamp: ApplyToCamp,
+	UploadConsentForm: UploadConsentForm,
+	CompleteTest: CompleteTest,
+	FindDataByName: FindDataByName,
 };

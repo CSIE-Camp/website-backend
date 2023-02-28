@@ -8,10 +8,11 @@ generator client {
 }
 
 model CampStatus {
-  id                Int       @id @default(1)
-  Apply_Deadline    DateTime?
-  AllowRegistration Boolean   @default(false)
-  AllowStatusLookup Boolean   @default(false)
+  id                       Int     @id @default(1)
+  Apply_Deadline_TimeStamp String?
+  Allow_Registration       Boolean @default(false)
+  Allow_Status_Lookup      Boolean @default(false)
+  LastEditedBy             String?
 }
 
 model Accounts {
@@ -19,8 +20,11 @@ model Accounts {
   CreatedAt      DateTime          @default(now())
   Email          String            @unique
   Password       String
+  PassedTest     Boolean           @default(false)
+  Applied        Boolean           @default(false)
   Status         ApplicationStatus @default(NOT_STARTED)
   Role           Roles             @default(PARTICIPANT)
+  Points          Int               @default(0)
   Profile        Profiles[]
   RefreshTokens  RefreshTokens[]
   PaymentDetails PaymentDetails[]
@@ -40,27 +44,25 @@ model Profiles {
   Name                          String?
   Gender                        String?
   School                        String?
-  DOB                           String?
-  ID_Doc                        String?
+  BirthDate                     String?
+  ID_Document                   String?
   ID_Validated                  Boolean   @default(false)
   PhoneNumber                   String?
-  Facebook                      String?
-  Diet                          String?
-  Allergen                      String?
+  FoodType                      String?
+  AllergySource                 String?
   Diseases                      String?
-  TravelHistory                 Boolean   @default(false)
-  SelfPortrait                  String?
+  ClothesSize                   String?
   SelfIntro                     String?
   Motivation                    String?
+  PicturePath                   String?
+  ConsentFormPath               String?
   Lang_Learned                  String?
   Lang_Mastered                 String?
-  ClothesSize                   String?
-  ParentialConsent              String?
   Emergency_ContactName         String?
   Emergency_ContactNumber       String?
   Emergency_ContactRelationship String?
   Emergency_BloodType           String?
-  PassedTest                    Boolean   @default(false)
+  Facebook                      String?
   Github                        String?
   Discord                       String?
   AccountId                     String    @unique
@@ -79,11 +81,11 @@ model PaymentDetails {
 }
 
 model Logs {
-  id          Int       @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   AccountId   String
   AccountType String
   Details     String
-  TimeStamp   DateTime  @default(now())
+  TimeStamp   DateTime @default(now())
 }
 
 enum PaymentStatus {

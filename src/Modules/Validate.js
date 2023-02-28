@@ -52,15 +52,15 @@ function ValidateARC(arc) {
 	}
 }
 
-function ValidateDocuments(document) {
-	if (ValidateID(document)) {
-		return { success: true, doc: `Taiwanese_Id|${document}` };
+function ValidateDocuments(Document) {
+	if (ValidateID(Document)) {
+		return `Taiwanese_Id|${Document}`;
 	}
 	let ARCType = ValidateARC(Document);
 	if (ARCType) {
-		return { success: true, doc: `${ARCType}|${document}` };
+		return `${ARCType}|${Document}`;
 	}
-	return { success: false, doc: `unidentified|${document}` };
+	return `Unknown|${Document}`;
 }
 
 const PhoneRegex = /\(??(0\d{1,2}?)\)??(\s*?|-??)(\d{3,4}(\s*?|-??)\d{3,4})/;
@@ -92,9 +92,17 @@ function IsValidFacebookUrl(url) {
 	return FacebookRegex.test(url);
 }
 
-const ValidBloodTypes = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
-function IsValidBloodType(bloodtype){
-	return ValidBloodTypes.includes(bloodtype.toUpperCase());
+const ValidBloodTypes = ["O", "A", "B", "AB", "Unknown"];
+function IsValidBloodType(BloodType){
+	let Index = Number(BloodType);
+	if (!Index){
+		console.log("No index");
+		return null;
+	}
+	if (Index < 0 || Index > ValidBloodTypes.length){
+		return null;
+	}
+	return ValidBloodTypes[Index];
 }
 
 const LevelLUT = {

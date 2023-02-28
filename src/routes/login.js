@@ -12,14 +12,8 @@ const { IsValidEmail, IsValidString, IsValidPassword } = require("../Modules/Val
 const { SendPasswordResetEmail } = require("./../Services/EmailService");
 
 const { AuthenticateAccessToken, AuthenticateRefreshToken, AuthenticateTempAccessToken } = require("./../Middleware/AuthenticateToken");
-const { FindAccountByEmail, FindPendingAccountByEmail, GetAccountId, UpdateAccountPassword } = require("../Modules/Database");
-const { REPL_MODE_SLOPPY } = require("repl");
-const RedisClient = redis.createClient();
+const { FindAccountByEmail, FindPendingAccountByEmail, GetAccountId, UpdateAccountPassword, GetAccountStatus} = require("../Modules/Database");
 const router = express.Router();
-
-async function Login(email, password, ip) {
-	
-}
 
 //login
 router.post("/", async (req, res) => {
@@ -40,18 +34,22 @@ router.post("/", async (req, res) => {
 	}
 	try {
 		let Account = await FindAccountByEmail(email);
-		let id = Account.id;;
+		let AccountId = Account.id;
 		if (!await bcrypt.compare(password, Account.Password)) {
 			return res.status(400),json({ message: "Invalid email or password!" });
 		}
-		let AccessToken = await GenerateAccessToken(Account.id, Account.Role, ip);
-		let RefreshToken = await GenerateRefreshToken(Account.id, ip);
-		return res.status(200).json({ 
-			access_token: AccessToken, 
-			refresh_token: RefreshToken,
-			token_type: "Bearer",
-			role: Account.Role,
-		});
+		let AccessToken = await GenerateAccessToken(AccountId, Account.Role, ip);
+		let RefreshToken = await GenerateRefreshToken(AccountId, ip);
+		let ReturnData = {
+			token: {},
+			Account: {},
+		};
+		ReturnData.token.access_token = AccessToken;
+		ReturnData.token.refresh_token = RefreshToken;
+		ReturnData.token.token_type = "Bearer";
+		ReturnData.Account.Role = Account.Role;
+		ReturnData.Account.Status = await GetAccountStatus(AccountId);
+		return res.status(200).json(ReturnData);
 	} catch (error) {
 		console.log(error);
 		return res.status(500).json({ message: "Unexpected error occured! Please try again later" });
@@ -61,7 +59,6 @@ router.post("/", async (req, res) => {
 //refresh access token
 router.post("/refresh", AuthenticateRefreshToken, async (req, res) => {
 	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-	let token = await GenerateAccessToken(req.UserId, ip);
 	return res.status(200).json({
 		message: "Access token generated",
 		data: {
