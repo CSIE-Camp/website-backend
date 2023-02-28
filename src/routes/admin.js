@@ -205,7 +205,7 @@ router.post("/search", AuthenticateAccessToken, async (req, res) => {
     let AccountId = req.userid;
     let AccountRole = req.role;
     let Name = req.body.Name || "";
-    let ReturnData = {};``
+    let ReturnData = {};
     let ReturnMessage = CheckPermissions({
         AccountId: AccountId,
         CurrentRole: AccountRole,

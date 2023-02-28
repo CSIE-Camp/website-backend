@@ -263,6 +263,9 @@
  - Liver
  - Will to live 
 
-  ### 2023-02-28 18:03 (Maxx) ###
+  ### 2023-02-28 18:13 (Maxx) ###
  **Changed**
  - Made role validation its own function
+ - Added fbLink to "Flag" if fbLink is invalid in /profile
+ - Added MissingData field to /profile/update
+ - All Response Body should have a new token field which contains token_type and access_token (if role has changed)

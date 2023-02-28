@@ -6,7 +6,7 @@ const bcrypt = require("bcrypt");
 const express = require("express");
 const jwt = require("jsonwebtoken");
 
-const { GenerateAccessToken, GenerateRefreshToken, RevokeRefreshToken, GenerateTempAccessToken, RevokeA } = require("./../Modules/Tokens");
+const { GenerateAccessToken, GenerateRefreshToken, RevokeRefreshToken, GenerateTempAccessToken, RevokeA, RevokeAllRefreshTokens } = require("./../Modules/Tokens");
 const { IsValidEmail, IsValidString, IsValidPassword } = require("../Modules/Validate");
 
 const { SendPasswordResetEmail } = require("./../Services/EmailService");
@@ -121,9 +121,10 @@ router.post("/password/update", AuthenticateTempAccessToken, async (req, res) =>
 	}
 	try {
 		let hashed = await bcrypt.hash(password, SALTROUNDS);
-		let status = await UpdateAccountPassword(email, hashed);
-		if (status){
-			return res.status(200).json({message: "Password Updated!"});
+		let AccountId = await UpdateAccountPassword(email, hashed);
+		if (AccountId){
+			await RevokeAllRefreshTokens(AccountId);
+			return res.status(200).json({message: "Password Updated! Logged out from all devices"});
 		}
 		return res.status(500),json({message: "Internal Server Error"});
 	} catch (error) {

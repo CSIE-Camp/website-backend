@@ -91,7 +91,7 @@ async function UpdateAccountPassword(Email, password) {
 	if (!Account){
 		return false;
 	}
-	let UserRecord = await prisma.accounts.update({
+	await prisma.accounts.update({
 		where: {
 			id: Account.id,
 		},
@@ -99,7 +99,7 @@ async function UpdateAccountPassword(Email, password) {
 			Password: password,
 		},
 	});
-	return true;
+	return Account.id;
 }
 
 async function GetAccountId(Email){
@@ -218,10 +218,12 @@ async function UpdateProfile(AccountId, NewProfileData){
 	let ExistingProfile = await FindProfile(AccountId);
 	let ExistingKeys = Object.keys(ExistingProfile);
 	let ToUpdate = {};
+	let Missing = {};
 	let PersonalId = NewProfileData["personalId"];
 	if (PersonalId){
 		ToUpdate.ID_Validated = PersonalId.split("|")[0] !== "Unknown" ? true : false;
 	}
+	
 	for (let i = 0; i < ExistingKeys.length; i++){
 		let Key = ExistingKeys[i];
 		if (Key == "ConsentFormPath"){
@@ -233,6 +235,9 @@ async function UpdateProfile(AccountId, NewProfileData){
 			if (New && Existing !== New){
 				ToUpdate[Key] = New;
 			}
+			if (!New){
+				Missing[NewProfileTranslate[Key]] = "Missing data";
+			}
 		}
 	}
 	let NewProfile = await prisma.profiles.update({
@@ -243,7 +248,7 @@ async function UpdateProfile(AccountId, NewProfileData){
 	});
 	delete(NewProfile.id);
 	delete(NewProfile.AccountId);
-	return NewProfile;
+	return {NewProfile, Missing};
 }
 
 async function GetPaymentDetails(AccountId){

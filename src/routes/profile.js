@@ -37,9 +37,16 @@ const upload = multer({
 
 router.get("/", AuthenticateAccessToken, async (req, res) => {
 	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-	let UserId = req.userid;
-	let profile = await FindProfile(UserId);
-	return res.status(200).json({ success: true, profile });
+	let AccountId = req.userid;
+	let Profile = await FindProfile(AccountId);
+	let NewToken = await CompareRoles(AccountId, AccountRole, ip);
+    let ReturnData = {};
+    if (NewToken){
+        ReturnData.tokens.access_token = NewToken;
+        ReturnData.tokens.token_type = "Bearer";
+    }
+	ReturnData.Profile = Profile;
+	return res.status(200).json(ReturnData);
 });
 
 async function RemoveImage(Path){
@@ -56,6 +63,7 @@ router.post("/update", AuthenticateAccessToken, upload.single("selfPicture"), as
 	let Profile = req.body;
 	Profile.ImagePath = req.imagepath;
 	let AccountId = req.userid;
+	let ReturnData = {};
 	let Flags = {};
 	let CampStatus = await GetCampStatus();
 	if (!CampStatus.AllowRegistration){
@@ -103,6 +111,7 @@ router.post("/update", AuthenticateAccessToken, upload.single("selfPicture"), as
 	if (Profile.fbLink){
 		if (!IsValidFacebookUrl(Profile.fbLink)){
 			delete(Profile.fbLink);
+			Flags.fbLink = "無效的臉書鏈結";
 		}
 	}
 	if (Profile.foodType){
@@ -139,8 +148,16 @@ router.post("/update", AuthenticateAccessToken, upload.single("selfPicture"), as
 			Profile.clothesSize = AvailableSizes[Size - 1];
 		}
 	}
-	let Status = await UpdateProfile(AccountId, Profile);
-	return res.status(200).json({ StoredData: Status, InvalidData: Flags});
+	let NewToken = await CompareRoles(AccountId, AccountRole, ip);
+    if (NewToken){
+        ReturnData.tokens.access_token = NewToken;
+        ReturnData.tokens.token_type = "Bearer";
+    }
+	let {Status, MissingFields} = await UpdateProfile(AccountId, Profile);
+	ReturnData.StoredData = Status;
+	ReturnData.InvalidData = Flags;
+	ReturnData.MissingData = MissingFields;
+	return res.status(200).json(ReturnData);
 });
 
 module.exports = router;

@@ -24,7 +24,7 @@ model Accounts {
   Applied        Boolean           @default(false)
   Status         ApplicationStatus @default(NOT_STARTED)
   Role           Roles             @default(PARTICIPANT)
-  Points          Int               @default(0)
+  Points         Int               @default(0)
   Profile        Profiles[]
   RefreshTokens  RefreshTokens[]
   PaymentDetails PaymentDetails[]
