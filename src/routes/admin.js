@@ -6,31 +6,41 @@ const express = require("express");
 const { GenerateAccessToken, CompareRoles} = require("../Modules/Tokens");
 const router = express.Router();
 
+async function CheckPermissions({AccountId, CurrentRole, RequiredLevel, LogMessage}){
+    if (ValidateRoles(CurrentRole, RequiredLevel)){
+        return [true, null];
+    }
+    let Account = await FindAccountById(AccountId);
+    if (ValidateRoles(Account.Role, RequiredLevel)){
+        return [true, Account.Role];
+    }
+    if (LogMessage){
+        await Log(AccountId, AccountRole, LogMessage);
+    }
+    return [false];
+}
+
+//view profile of given AccountId, STAFF+
 router.get("/view-profile/:id", AuthenticateAccessToken, async (req, res) => {
     let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
     let AccountId = req.userid;
     let AccountRole = req.role;
     let TargetAccount = req.params.id;
-    let NeedNewToken = false;
-    let NewToken = null;
-    let NewRole = null;
-    if (!ValidateRoles(AccountRole, 1)){
-        let Account = await FindAccountById(AccountId);
-        if (!ValidateRoles(Account.Role, 1)){
-            await Log(AccountId, AccountRole, `Attempted to access profile ${TargetAccount !== "null" ? TargetAccount : "of all users"} with insufficient privileges from [${ip}]`);
-            return res.status(401).json({message: "Insufficient privileges"});
-        }
-        NewRole = Account.Role;
-        NeedNewToken = true;
-    }
-    if (NeedNewToken){
-        NewToken = await GenerateAccessToken(AccountId, NewRole, ip);
-    }
     let ReturnData = {};
-    if (NewToken){
-        ReturnData.tokens.access_token = NewToken;
-        ReturnData.tokens.token_type = "Bearer";
+    let ReturnMessage = CheckPermissions({
+        Accountid: AccountId, 
+        CurrentRole: AccountRole, 
+        RequiredLevel: 1, 
+        LogMessage: `Attempted to access profile ${TargetAccount !== "null" ? TargetAccount : "of all users"} with insufficient privileges from [${ip}]`,
+    });
+    if (!ReturnMessage[0]){
+        return res.status(401).json({message: "Insufficient privileges"});
     }
+    if (ReturnMessage[1]){
+        ReturnData.token = {};
+        ReturnData.token.access_token = await GenerateAccessToken(AccountId, ReturnMessage[1], ip);;
+        ReturnData.token.token_type = "Bearer";
+    }    
     if (TargetAccount !== "null"){
         ReturnData.ProfileData = await AdminViewProfile(TargetAccount, AccountId, AccountRole);
         return res.status(200).json(ReturnData);
@@ -39,33 +49,29 @@ router.get("/view-profile/:id", AuthenticateAccessToken, async (req, res) => {
     return res.status(200).json(ReturnData);
 });
 
+//Changes the status of given AccountId, ADMIN / DEVELOPER only
 router.post("/confirm-status", AuthenticateAccessToken, async (req, res) => {
     let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
     let AccountId = req.userid;
     let AccountRole = req.role;
     let TargetAccount = req.body.TargetAccount;
     let NewStatus = req.body.NewStatus || "";
-    let NeedNewToken = false;
-    let NewToken = null;
-    let NewRole = null;
-    if (!ValidateRoles(AccountRole, 2)){
-        let Account = await FindAccountById(AccountId);
-        if (!ValidateRoles(Account.Role, 1)){
-            await Log(AccountId, AccountRole, "Attempted to edit application status with insufficient privileges");
-            return res.status(401).json({message: "Insufficieitn privileges"});
-        }
-        NewRole = Account.Role;
-        NeedNewToken = true;
-    }
-    let Status = await ChangeApplicationStatus(AccountId, AccountRole, TargetAccount, NewStatus, ip);
-    if (NeedNewToken){
-        NewToken = await GenerateAccessToken(AccountId, NewRole, ip);
-    }
     let ReturnData = {};
-    if (NewToken){
-        ReturnData.tokens.access_token = NewToken;
-        ReturnData.tokens.token_type = "Bearer";
+    let ReturnMessage = CheckPermissions({
+        AccountId: AccountId, 
+        CurrentRole: AccountRole, 
+        RequiredLevel: 2, 
+        LogMessage: `Attempted to edit application status with insufficient privileges from [${ip}]`,
+    });
+    if (!ReturnMessage[0]){
+        return res.status(401).json({message: "Insufficient privileges"});
     }
+    if (ReturnMessage[1]){
+        ReturnData.token = {};
+        ReturnData.token.access_token = await GenerateAccessToken(AccountId, ReturnMessage[1], ip);;
+        ReturnData.token.token_type = "Bearer";
+    }  
+    let Status = await ChangeApplicationStatus(AccountId, AccountRole, TargetAccount, NewStatus, ip);
     if (!Status[0]){
         ReturnData.message = Status[1];
         return res.status(400).json(ReturnData);
@@ -74,30 +80,26 @@ router.post("/confirm-status", AuthenticateAccessToken, async (req, res) => {
     return res.status(200).json(ReturnData);
 });
 
+//confirm payment of given AccountId
 router.post("/confirm-payment", AuthenticateAccessToken, async (req, res) => {
     let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
     let AccountId = req.userid;
     let AccountRole = req.role;
     let TargetAccount = req.body.TargetAccount || "";
-    let NeedNewToken = false;
-    let NewToken = null;
-    let NewRole = null;
-    if (!ValidateRoles(AccountRole, 1)){
-        let Account = await FindAccountById(AccountId);
-        if (!ValidateRoles(Account.Role, 1)){
-            await Log(AccountId, AccountRole, "Attempted to confirm the payment status of accounts with insufficient privileges");
-            return res.status(401).json({message: "Insufficient privileges"});
-        }
-        NewRole = Account.Role;
-        NeedNewToken = true;
-    }
-    if (NeedNewToken){
-        NewToken = await GenerateAccessToken(AccountId, NewRole, ip);
-    }
     let ReturnData = {};
-    if (NewToken){
-        ReturnData.tokens.access_token = NewToken;
-        ReturnData.tokens.token_type = "Bearer";
+    let ReturnMessage = CheckPermissions({
+        AccountId: AccountId,
+        CurrentRole: AccountRole,
+        RequiredLevel: 2, 
+        LogMessage: `Attempted to confirm the payment status of accounts with insufficient privileges from [${ip}]`,
+    });
+    if (!ReturnMessage[0]){
+        return res.status(401).json({message: "Insufficient privileges"});
+    }
+    if (ReturnMessage[1]){
+        ReturnData.token = {};
+        ReturnData.token.access_token = await GenerateAccessToken(AccountId, ReturnMessage[1], ip);;
+        ReturnData.token.token_type = "Bearer";
     }
     if (!(TargetAccount)){
         await Log(AccountId, AccountRole, `Attempted to edit payment status without enough arguments from [${ip}}]`);
@@ -112,28 +114,27 @@ router.post("/confirm-payment", AuthenticateAccessToken, async (req, res) => {
     return res.status(200).json(ReturnData);
 });
 
+//Updates the role for the given AccountId
 router.post("/update-roles", AuthenticateAccessToken, async (req, res) => {
     let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
     let AccountId = req.userid;
     let AccountRole = req.role;
     let TargetAccount = req.body.TargetAccount;
     let PendingRole = req.body.NewRole;
-    let NeedNewToken = false;
-    let NewToken = null;
-    let NewRole = null;
-    if (!ValidateRoles(AccountRole, 2)){
-        let Account = await FindAccountById(AccountId);
-        if (!ValidateRoles(Account.Role, 2)){
-            await Log(AccountId, AccountRole, `Attempted to edit roles for ${TargetAccount} with insufficient privileges from [${ip}}]`);
-            return res.status(403).json({message: "Insufficient privileges"});
-        }
-        NewRole = Account.Role;
-        NeedNewToken = true;
-    }
     let ReturnData = {};
-    if (NewToken){
-        ReturnData.tokens.access_token = NewToken;
-        ReturnData.tokens.token_type = "Bearer";
+    let ReturnMessage = CheckPermissions({
+        AccountId: AccountId,
+        CurrentRole: AccountRole,
+        RequiredLevel: 2,
+        LogMessage: `Attempted to edit roles for ${TargetAccount ? TargetAccount : "unknown account"} with insufficient privileges from [${ip}}]`,
+    });
+    if (!ReturnMessage[0]){
+        return res.status(401).json({message: "Insufficient privileges"});
+    }
+    if (ReturnMessage[1]){
+        ReturnData.token = {};
+        ReturnData.token.access_token = await GenerateAccessToken(AccountId, ReturnMessage[1], ip);;
+        ReturnData.token.token_type = "Bearer";
     }
     if (!(TargetAccount && PendingRole)){
         await Log(AccountId, AccountRole, `Attempted to edit roles without enough arguments from [${ip}}]`);
@@ -153,26 +154,25 @@ router.post("/update-roles", AuthenticateAccessToken, async (req, res) => {
     return res.status(200).json(ReturnData);
 });
 
+//view logs of given ID or All
 router.get("/view-logs/:TargetAccount", AuthenticateAccessToken, async (req, res) => {
     let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
     let AccountId = req.userid;
     let AccountRole = req.role;
     let TargetAccount = req.params.TargetAccount;
-    let NeedNewToken = false;
-    let NewToken = null;
-    let NewRole = null;
-    if (!ValidateRoles(AccountRole, 1)){
-        let Account = await FindAccountById(AccountId);
-        if (!ValidateRoles(Account.Role, 2)){
-            return res.status(403).json({message: "Insufficient privileges"});
-        }
-        NewRole = Account.Role;
-        NeedNewToken = true;
-    }
     let ReturnData = {};
-    if (NewToken){
-        ReturnData.tokens.access_token = NewToken;
-        ReturnData.tokens.token_type = "Bearer";
+    let ReturnMessage = CheckPermissions({
+        AccountId: AccountId,
+        CurrentRole: AccountRole,
+        RequiredLevel: 2,
+    });
+    if (!ReturnMessage[0]){
+        return res.status(401).json({message: "Insufficient privileges"});
+    }
+    if (ReturnMessage[1]){
+        ReturnData.token = {};
+        ReturnData.token.access_token = await GenerateAccessToken(AccountId, ReturnMessage[1], ip);;
+        ReturnData.token.token_type = "Bearer";
     }
     ReturnData.Logs = await GetLogs(AccountId, AccountRole, TargetAccount, ip);
     return res.status(200).json(ReturnData);
@@ -182,11 +182,19 @@ router.get("/get-camp-status", AuthenticateAccessToken, async (req, res) => {
     let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
     let AccountId = req.userid;
     let CurrentRole = req.role;
-    let NewToken = await CompareRoles(AccountId, CurrentRole, ip);
     let ReturnData = {};
-    if (NewToken){
-        ReturnData.tokens.access_token = NewToken;
-        ReturnData.tokens.token_type = "Bearer";
+    let ReturnMessage = CheckPermissions({
+        AccountId: AccountId,
+        CurrentRole: AccountRole,
+        RequiredLevel: 1,
+    });
+    if (!ReturnMessage[0]){
+        return res.status(401).json({message: "Insufficient privileges"});
+    }
+    if (ReturnMessage[1]){
+        ReturnData.token = {};
+        ReturnData.token.access_token = await GenerateAccessToken(AccountId, ReturnMessage[1], ip);;
+        ReturnData.token.token_type = "Bearer";
     }
     ReturnData.CampStatus = await GetCampStatus();
     return res.status(200).json(ReturnData);
@@ -197,21 +205,19 @@ router.post("/search", AuthenticateAccessToken, async (req, res) => {
     let AccountId = req.userid;
     let AccountRole = req.role;
     let Name = req.body.Name || "";
-    let NeedNewToken = false;
-    let NewToken = null;
-    let NewRole = null;
-    if (!ValidateRoles(AccountRole, 1)){
-        let Account = await FindAccountById(AccountId);
-        if (!ValidateRoles(Account.Role, 1)){
-            return res.status(403).json({message: "Insufficient privileges"});
-        }
-        NewRole = Account.Role;
-        NeedNewToken = true;
+    let ReturnData = {};``
+    let ReturnMessage = CheckPermissions({
+        AccountId: AccountId,
+        CurrentRole: AccountRole,
+        RequiredLevel: 1,
+    });
+    if (!ReturnMessage[0]){
+        return res.status(401).json({message: "Insufficient privileges"});
     }
-    let ReturnData = {};
-    if (NewToken){
-        ReturnData.tokens.access_token = NewToken;
-        ReturnData.tokens.token_type = "Bearer";
+    if (ReturnMessage[1]){
+        ReturnData.token = {};
+        ReturnData.token.access_token = await GenerateAccessToken(AccountId, ReturnMessage[1], ip);;
+        ReturnData.token.token_type = "Bearer";
     }
     ReturnData.TargetAccounts = await FindDataByName(Name);
     return res.status(200).json(ReturnData);
@@ -222,21 +228,19 @@ router.post("/edit-camp-status", AuthenticateAccessToken, async (req, res) => {
     let AccountId = req.userid;
     let AccountRole = req.role;
     let NewStatus = req.body;
-    let NeedNewToken = false;
-    let NewToken = null;
-    let NewRole = null;
-    if (!ValidateRoles(AccountRole, 2)){
-        let Account = await FindAccountById(AccountId);
-        if (!ValidateRoles(Account.Role, 2)){
-            return res.status(403).json({message: "Insufficient privileges"});
-        }
-        NewRole = Account.Role;
-        NeedNewToken = true;
-    }
     let ReturnData = {};
-    if (NewToken){
-        ReturnData.tokens.access_token = NewToken;
-        ReturnData.tokens.token_type = "Bearer";
+    let ReturnMessage = CheckPermissions({
+        AccountId: AccountId,
+        CurrentRole: AccountRole,
+        RequiredLevel: 2,
+    });
+    if (!ReturnMessage[0]){
+        return res.status(401).json({message: "Insufficient privileges"});
+    }
+    if (ReturnMessage[1]){
+        ReturnData.token = {};
+        ReturnData.token.access_token = await GenerateAccessToken(AccountId, ReturnMessage[1], ip);;
+        ReturnData.token.token_type = "Bearer";
     }
     let Keys = Object.keys(NewStatus);
     const Allowed = ["Apply_Deadline_TimeStamp", "Allow_Registration", "Allow_Status_Lookup"];

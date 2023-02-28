@@ -262,3 +262,7 @@
  - Health
  - Liver
  - Will to live 
+
+  ### 2023-02-28 18:03 (Maxx) ###
+ **Changed**
+ - Made role validation its own function
