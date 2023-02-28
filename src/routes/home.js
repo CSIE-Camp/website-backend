@@ -97,7 +97,7 @@ router.post("/complete-test", AuthenticateAccessToken, async (req, res) => {
 	return res.status(200).json(ReturnData);
 });
 
-router.post("/upload", AuthenticateAccessToken, upload.single(ConsentForm), async (req, res) => {
+router.post("/upload", AuthenticateAccessToken, upload.single("ConsentForm"), async (req, res) => {
 	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 	let AccountId = req.userid;
 	let AccountRole = req.role;
