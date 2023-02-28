@@ -52,7 +52,7 @@ router.post("/confirm-status", AuthenticateAccessToken, async (req, res) => {
         let Account = await FindAccountById(AccountId);
         if (!ValidateRoles(Account.Role, 1)){
             await Log(AccountId, AccountRole, "Attempted to edit application status with insufficient privileges");
-            return res.status(401).json({message: "Insufficieitn privileges"});
+            return res.status(401).json({message: "Insufficient privileges"});
         }
         NewRole = Account.Role;
         NeedNewToken = true;
