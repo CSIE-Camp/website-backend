@@ -275,3 +275,9 @@
  - Reformatted spec.yaml (still have a few to go, only finished /signup and /login)
  **Planned**
  - Remake data stored in AccessToken 
+
+
+   ### 2023-03-02 21:36 (Maxx) ###
+ **Changed**
+ - Removed planned update (AccessToken cannot be invalidated)
+ - All refresh tokens will be invalidated upon password change
