@@ -24,6 +24,7 @@ app.get("/", (req, res) => {
 	return res.sendFile(path.join(__dirname, "index.html"));
 });
 
+
 app.use("/", index);
 app.use("/home", home);
 app.use("/login", login);

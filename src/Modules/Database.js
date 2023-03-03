@@ -1,5 +1,6 @@
 const {DEV_MODE} = require("./../config");
 const { PrismaClient } = require("@prisma/client");
+const e = require("express");
 
 const prisma = new PrismaClient;
 
@@ -174,19 +175,6 @@ async function FindProfile(id) {
 			AccountId: id,
 		},
 	});
-	if (Profile.Validated_ID == null && Profile.Unvalidate_ID == null){
-		delete(Profile.Validated_ID);
-		delete(Profile.Unvalidate_ID);
-		Profile["ID_Documents"] = "";
-	}
-	if (Profile.Validated_ID && Profile.Unvalidate_ID == null){
-		delete(Profile.Unvalidate_ID);
-		Profile["ID_Documents"] = Profile.Validated_ID;
-	}
-	if (Profile.Validated_ID == null && Profile.Unvalidate_ID){
-		delete(Profile.Validated_ID);
-		Profile["ID_Documents"] = Profile.Unvalidate_ID;
-	}
 	delete (Profile.id);
 	delete(Profile.AccountId);
 	return Profile;
@@ -382,11 +370,14 @@ async function AdminViewProfile(TargetId, AccountId, AccountRole){
 	ReturnData.Account.CreatedAt = Account.CreatedAt;
 	ReturnData.Account.Role = Account.Role;
 	Account = null;
-	ReturnData.Profile = await prisma.profiles.findUnique({
-		where: {
-			AccountId: TargetId,
-		},
-	});
+	let Profile = await FindProfile(TargetId);
+	let PaymentDetails = await GetPaymentDetails(TargetId);
+	if (AccountRole != "ADMIN" && AccountRole !== "DEVELOPER"){
+		delete(Profile.ID_Document);
+		delete(PaymentDetails.AccountName);
+		delete(PaymentDetails.Account_Last5Digits);
+	}
+	ReturnData.Profile = Profile;
 	ReturnData.PaymentDetails = await GetPaymentDetails(TargetId);
 	
 	await Log(AccountId, AccountRole, `Has queried profile data for account ${TargetId}`);
@@ -398,18 +389,23 @@ async function AdminViewAllProfile(AccountId, AccountRole){
 	let Accounts = await prisma.accounts.findMany();
 	for (let i = 0; i < Accounts.length; i++){
 		let Account = Accounts[i];
-		ReturnData[Account.id] = {
-			Account: {
-				Email: Account.Email,
-				CreatedAt: Account.CreatedAt,
-				Role: Account.Role,
-				Status:  Account.Status,
-			},
-			Profile: await FindProfile(Account.id),
-		};
-		if (Account.Status === "ACCEPTED" || Account.Status === "WAITLIST_ACCEPTED"){
-			ReturnData.PaymentDetails = await GetPaymentDetails(Account.id);
+		let AccountId = Account.AccountId;
+		let Profile = await FindProfile(AccountId);
+		let PaymentDetails = await GetPaymentDetails(AccountId);
+		if (AccountRole != "ADMIN" && AccountRole !== "DEVELOPER"){
+			delete(Profile.ID_Document);
+			delete(PaymentDetails.AccountName);
+			delete(PaymentDetails.Account_Last5Digits);
 		}
+		ReturnData.AccountId = {};
+		ReturnData.AccountId.Account = {
+			Email: Account.Email,
+			CreatedAt: Account.CreatedAt,
+			Role: Account.Role,
+			Status: Account.Status,
+		};
+		ReturnData.AccountId.Profile = Profile;
+		ReturnData.AccountId.PaymentDetails = PaymentDetails;
 	};
 	await Log(AccountId, AccountRole, "User has queried for ALL profile data");
 	return ReturnData;
@@ -500,8 +496,8 @@ async function GetLogs(AccountId, AccountRole, TargetAccount, ip){
 }
 
 async function GetAccountStatus(AccountId){
-	let Profile = FindProfile(AccountId);
-	let Account = FindAccountById(AccountId);
+	let Profile = await FindProfile(AccountId);
+	let Account = await FindAccountById(AccountId);
 	let Keys = Object.keys(Profile);
 	let ReturnData = {
 		Applied: Account.Applied,
@@ -569,7 +565,7 @@ async function EditPoints(AccountId, Points){
 	return NewRecord.Points;
 }
 
-async function FindDataByName(Name){
+async function FindDataByName(Name, Role){
 	let Records = await prisma.profiles.findMany({
 		where: {
 			Name: Name,
@@ -581,8 +577,15 @@ async function FindDataByName(Name){
 	let ReturnData = {};
 	for (let i = 0; i < Object.keys(Records).length; i++){
 		let Profile = Records[i];
+		delete(Profile.id);
+		delete(Profile.AccountId);
 		let Account = await FindAccountById(Profile.AccountId);
 		let PaymentData = await GetPaymentDetails(Profile.AccountId);
+		if (Role !== "ADMIN" && Role !== "DEVELOPER"){
+			delete(Profile.ID_Document);
+			delete(PaymentData.AccountName);
+			delete(PaymentData.Account_Last5Digits);
+		}
 		ReturnData[Profile.AccountId] = {
 			Profile: Profile,
 			Account: Account,
@@ -633,3 +636,4 @@ module.exports = {
 	CompleteTest: CompleteTest,
 	FindDataByName: FindDataByName,
 };
+

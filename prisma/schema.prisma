@@ -9,7 +9,7 @@ generator client {
 
 model CampStatus {
   id                       Int     @id @default(1)
-  Apply_Deadline_TimeStamp String?
+  Apply_Deadline_TimeStampv String?
   Allow_Registration       Boolean @default(false)
   Allow_Status_Lookup      Boolean @default(false)
   LastEditedBy             String?

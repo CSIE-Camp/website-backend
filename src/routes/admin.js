@@ -54,7 +54,7 @@ router.post("/confirm-status", AuthenticateAccessToken, async (req, res) => {
     let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
     let AccountId = req.userid;
     let AccountRole = req.role;
-    let TargetAccount = req.body.TargetAccount;
+    let TargetAccount = req.body.TargetAccount || "";
     let NewStatus = req.body.NewStatus || "";
     let ReturnData = {};
     let ReturnMessage = CheckPermissions({
@@ -104,7 +104,7 @@ router.post("/confirm-payment", AuthenticateAccessToken, async (req, res) => {
     if (!(TargetAccount)){
         await Log(AccountId, AccountRole, `Attempted to edit payment status without enough arguments from [${ip}}]`);
         ReturnData.message = "Not enough arguments";
-        return res.status(401).json(ReturnData);
+        return res.status(403).json(ReturnData);
     }
     let Status = await ConfirmPaymentStatus(AccountId, AccountRole, TargetAccount, ip);
     ReturnData.message = Status[1];
@@ -145,12 +145,12 @@ router.post("/update-roles", AuthenticateAccessToken, async (req, res) => {
         ReturnData.message = "Cannot change roles for self";
         return res.status(403).json(ReturnData);
     }
-    if (!(PendingRole === "STAFF" || PendingRole === "ADMIN")){
+    if (!(PendingRole === "STAFF" || PendingRole === "ADMIN" || PendingRole === "PARTICIPANT")){
         ReturnData.message = "Invalid Roles";
         return res.status(403).json(ReturnData);
     }
-    let RoleData = await UpdateAccountRoles(AccountId, AccountRole, TargetAccount, PendingRole);
-    ReturnData.RoleData = RoleData;
+    let message = await UpdateAccountRoles(AccountId, AccountRole, TargetAccount, PendingRole);
+    ReturnData.message = RoleData;
     return res.status(200).json(ReturnData);
 });
 
@@ -181,7 +181,6 @@ router.get("/view-logs/:TargetAccount", AuthenticateAccessToken, async (req, res
 router.get("/get-camp-status", AuthenticateAccessToken, async (req, res) => {
     let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
     let AccountId = req.userid;
-    let CurrentRole = req.role;
     let ReturnData = {};
     let ReturnMessage = CheckPermissions({
         AccountId: AccountId,
@@ -197,29 +196,6 @@ router.get("/get-camp-status", AuthenticateAccessToken, async (req, res) => {
         ReturnData.token.token_type = "Bearer";
     }
     ReturnData.CampStatus = await GetCampStatus();
-    return res.status(200).json(ReturnData);
-});
-
-router.post("/search", AuthenticateAccessToken, async (req, res) => {
-    let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-    let AccountId = req.userid;
-    let AccountRole = req.role;
-    let Name = req.body.Name || "";
-    let ReturnData = {};
-    let ReturnMessage = CheckPermissions({
-        AccountId: AccountId,
-        CurrentRole: AccountRole,
-        RequiredLevel: 1,
-    });
-    if (!ReturnMessage[0]){
-        return res.status(401).json({message: "Insufficient privileges"});
-    }
-    if (ReturnMessage[1]){
-        ReturnData.token = {};
-        ReturnData.token.access_token = await GenerateAccessToken(AccountId, ReturnMessage[1], ip);;
-        ReturnData.token.token_type = "Bearer";
-    }
-    ReturnData.TargetAccounts = await FindDataByName(Name);
     return res.status(200).json(ReturnData);
 });
 
@@ -270,4 +246,26 @@ router.post("/edit-camp-status", AuthenticateAccessToken, async (req, res) => {
     return res.status(200).json(ReturnData);
 });
 
+router.post("/search", AuthenticateAccessToken, async (req, res) => {
+    let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+    let AccountId = req.userid;
+    let AccountRole = req.role;
+    let Name = req.body.Name || "";
+    let ReturnData = {};
+    let ReturnMessage = CheckPermissions({
+        AccountId: AccountId,
+        CurrentRole: AccountRole,
+        RequiredLevel: 1,
+    });
+    if (!ReturnMessage[0]){
+        return res.status(401).json({message: "Insufficient privileges"});
+    }
+    if (ReturnMessage[1]){
+        ReturnData.token = {};
+        ReturnData.token.access_token = await GenerateAccessToken(AccountId, ReturnMessage[1], ip);;
+        ReturnData.token.token_type = "Bearer";
+    }
+    ReturnData.TargetAccounts = await FindDataByName(Name, AccountRole);
+    return res.status(200).json(ReturnData);
+});
 module.exports = router;

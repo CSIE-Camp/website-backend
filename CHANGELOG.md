@@ -281,3 +281,7 @@
  **Changed**
  - Removed planned update (AccessToken cannot be invalidated)
  - All refresh tokens will be invalidated upon password change
+ 
+   ### 2023-03-03 14:00 (Maxx) ###
+ **Added**
+ - Latest API document

@@ -294,27 +294,32 @@ paths:
               schema:
                 $ref: "#/components/schemas/response/login/password_update/Code_500"
 
-#Finish below
-
   /admin/view-profile/{id}:
     get:
       tags:
         - Admin
-      summary: Go to users' profile
-      description: Goes to requested users profile if you are an admin
+      summary: Gets the given Account(s) profile
+      description: Retrieves the Account(s) profile
       parameters:
         - in: path
           name: id
-          required: true
           schema:
-            $ref: "#/components/schemas/id"
-          description: >-
-            "null" or AccountId
+            $ref: "#/components/schemas/request/admin/view_profile"
+          required: true
+          description: null or AccountId
       responses:
         "200":
           description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/view_profile/Code_200"
         "401":
           description: Insufficient privileges
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/view_profile/Code_401"
 
   /admin/confirm-status:
     post:
@@ -323,20 +328,37 @@ paths:
       summary: Modify application status
       description: Change target account's application status
       requestBody:
-        description: >-
-          Submit target account id and application status
+        description: Submit target account id and application status
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/application-status"
+              $ref: "#/components/schemas/request/admin/confirm_status"
       responses:
         "200":
           description: Ok
-        "401":
-          description: Insufficient privileges
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/confirm_status/Code_200"
         "400":
           description: Invalid data
-
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/confirm_status/Code_400"
+        "401":
+          description: Insufficient privileges
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/confirm_status/Code_401"
+        "403":
+          description: Not enough arguments 
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/confirm_status/Code_403"
+        
   /admin/confirm-payment:
     post:
       tags:
@@ -349,14 +371,35 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/payment-status"
+              $ref: "#/components/schemas/request/admin/confirm_payment"
       responses:
         "200":
           description: Ok
-        "401":
-          description: Insufficient privileges or not enough arguments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/confirm_payment/Code_200"
+
         "400":
           description: Invalid data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/confirm_payment/Code_400"
+
+        "401":
+          description: Insufficient privileges or not enough arguments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/confirm_payment/Code_401"
+       
+        "403":
+          description: Not enough arguments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/confirm_payment/Code_403"
 
   /admin/update-roles:
     post:
@@ -370,14 +413,35 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/update-role"
+              $ref: "#/components/schemas/request/admin/update_roles"
+
       responses:
         "200":
           description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/update_roles/Code_200"
         "400":
           description: Not enough arguments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/update_roles/Code_400"
+
+        "401":
+          description: Insufficient privileges
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/update_roles/Code_401"
+
         "403":
-          description: Insufficient privileges, invalid role or changing role for self
+          description: Attempted to change own role OR Invalid role
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/update_roles/Code_403"
 
   /admin/view-logs/{TargetAccount}:
     get:
@@ -390,13 +454,21 @@ paths:
           name: TargetAccount
           required: true
           schema:
-            $ref: "#/components/schemas/id"
+            $ref: "#/components/schemas/request/admin/view_logs"
           description: AccountId
       responses:
         "200":
           description: Ok
-        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/view_logs/Code_200"
+        "401":
           description: Insufficient privileges
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/view_logs/Code_401"
 
   /admin/get-camp-status:
     get:
@@ -410,8 +482,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/camp-status"
-
+                $ref: "#/components/schemas/response/admin/get_camp_status/Code_200"
+        "401":
+          description: Insufficienmt privileges
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/get_camp_status/Code_401"
   /admin/edit-camp-status:
     post:
       tags:
@@ -424,12 +501,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/camp-status"
+              $ref: "#/components/schemas/request/admin/edit_camp_status"
       responses:
         "200":
           description: Ok
-        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/edit_camp_status/Code_200"
+        "401":
           description: Insufficient privileges
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/edit_camp_status/Code_401"
 
   /admin/search:
     post:
@@ -443,13 +528,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/search"
+              $ref: "#/components/schemas/request/admin/search"
       responses:
         "200":
           description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/search/Code_200"
         "403":
           description: Insufficient privileges
-
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/search/Code_401"
 
   /profile:
     get:
@@ -463,7 +555,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/profile-get"
+                $ref: "#/components/schemas/response/profile/root/Code_200"
 
   /profile/update:
     post:
@@ -475,19 +567,145 @@ paths:
         description: >-
           Submit profile
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: "#/components/schemas/profile"
+              $ref: "#/components/schemas/request/profile/update"
       responses:
         "200":
           description: Ok
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/update-profile-response"
+                $ref: "#/components/schemas/response/profile/update/Code_200"
+        "401":
+          description: Attempted to temper with profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/profile/update/Code_401"
         "403":
-          description: Application service unavailable
+          description: Registration not started / Registration ended
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/profile/update/Code_403"
 
+  /home:
+    get:
+      tags:
+        - home
+      summary: Get Account Status
+      description: Retrieves the Account profile
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/home/root/Code_200"
+
+
+  /home/apply:
+    post:
+      tags:
+        - home
+      summary: Applies to NTNU CSIE Camp 2023
+      description: Applies to NTNU CSIE Camp 2023
+      requestBody:
+        description:  request body for home/apply
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/request/home/apply"
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/home/apply/Code_200"
+        "400":
+          description: Not enough arguments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/home/apply/Code_400"
+  
+  /home/complete-test:
+    post:
+      tags:
+        - home
+      summary: Completes the test
+      description: Singals the backend that the user has completed the test
+      requestBody:
+        description: body
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/request/home/complete_test"
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/home/complete_test/Code_200"
+        "400":
+          description: CompletedTest is false or null
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/home/complete_test/Code_400"
+
+  /home/upload:
+    post:
+      tags:
+        - home
+      summary: Submits the consent form
+      description: Submits consent form
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/request/home/upload"
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/home/upload/Code_200"
+        "400":
+          description: Not accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/home/upload/Code_400"
+
+  /home/update-payment:
+    post:
+      tags:
+        - home
+      summary: Updates payment data
+      description: Updates payment data
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/request/home/update_payment"
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/home/update_payment/Code_200"
+        "400":
+          description: Failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/home/update_payment/Code_400"
 components:
   securitySchemes:
     bearerAuth:
@@ -537,8 +755,129 @@ components:
             password:
               type: string
               example: 9cba73c31ac15d21512382ce6b21e83f8b9fddd31196ff4f54559a8e29add1e3bc4038c86c9bee7512d0d8ea72ec9480580dc677a9f172b46366ecb5198615ch
-
-        
+      admin:
+        view_profile:
+          type: string
+          example: AccountId
+        confirm_status:
+          type: object
+          properties:
+            TargetAccount:
+              type: string
+              example: AccountId
+            NewStatus:
+              type: string
+              example: STAFF / ACCEPTED / WAITLIST_ACCEPTED / WAITLIST / REJECTED
+        confirm_payment:
+          type: object
+          properties:
+            TargetAccount:
+              type: string
+              example: AccountId
+        update_roles:
+          type: object
+          properties:
+            TargetAccount:
+              type: string
+              example: AccountId
+            NewRole:
+              type: string
+              example: PARTICIPANT / STAFF / ADMIN
+        view_logs:
+          type: string
+          example: AccountId
+        edit_camp_status:
+          type: object
+          properties:
+            Apply_Deadline_TimeStamp:
+              type: string
+              example: Unix Timestamp (In seconds)
+            Allow_Registration:
+              type: boolean
+            Allow_Status_Lookup:
+              type: boolean
+        search:
+          type: object
+          properties:
+            Name:
+              type: string
+      profile:
+        update:
+          type: object
+          properties:
+            name:
+              type: string
+            gender:
+              type: string
+            school:
+              type: string
+            birthDate:
+              type: string
+            personalId:
+              type: string
+            phoneNumber:
+              type: string
+            bloodType:
+              type: string
+            fbLink:
+              type: string
+            parentName:
+              type: string
+            relation:
+              type: string
+            parentPhoneNumber:
+              type: string
+            travelHistory:
+              type: string
+            foodType:
+              type: string
+            allergySource:
+              type: string
+            disease:
+              type: string
+            clothesSize:
+              type: string
+            selfIntro:
+              type: string
+            motivation:
+              type: string
+            selfPicture:
+              type: string
+            lanlearned:
+              type: string
+            lanMaster:
+              type: string
+            selfPicture:
+              type: string
+              format: binary
+      home:
+        apply:
+          type: object
+          properties:
+            apply:
+              type: boolean
+        complete_test:
+          type: object
+          properties:
+            CompletedTest:
+              type: boolean
+        upload:
+          type: object
+          properties:
+            ConsentForm:
+              type: string
+              format: binary
+        update_payment:
+          type: object
+          properties:
+            PaymentData:
+              TransferDate:
+                type: string
+              AccountName:
+                type: string
+              Account_Last5Digits:
+                type: string
+          
     response:
       signup:
         email:
@@ -742,3 +1081,690 @@ components:
               message:
                 type: string
                 example: Internal server error
+      admin:
+        view_profile:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              ProfileData:
+                type: object
+                properties:
+                  Account:
+                    type: object
+                    properties:
+                      Email:
+                        type: string
+                        example: example@gmail.com
+                      CreatedAt:
+                        type: string
+                      Role:
+                        type: string
+                        example: PARTICIPANT
+                      Status:
+                        type: string
+                  Profile:
+                    type: object
+                    properties:
+                      Name:
+                        type: string
+                      Gender:
+                        type: string
+                      School:
+                        type: string
+                      BirthDate:
+                        type: string
+                      ID_Document:
+                        type: string
+                        example: This may be removed depending on the staff's Account role
+                      ID_Validated:
+                        type: boolean
+                      PhoneNumber:
+                        type: string
+                      FoodType:
+                        type: string
+                      AllergySource:
+                        type: string
+                      Diseases:
+                        type: string
+                      ClothesSize:
+                        type: string
+                      SelfIntro:
+                        type: string
+                      Motivation:
+                        type: string
+                      Lang_Learned:
+                        type: string
+                      Lang_Mastered:
+                        type: string
+                      Emergency_ContactName:
+                        type: string
+                      Emergency_ContactNumber:
+                        type: string
+                      Emergency_ContactRelationship:
+                        type: string
+                      Facebook:
+                        type: string
+                      Github:
+                        type: sting
+                      Discord:
+                        type: string
+                  PaymentDetails:
+                    type: object
+                    properties:
+                      TransferDate:
+                        type: string
+                      AccountName:
+                        type: string
+                        example: this may be removed depending on the admin's Account Role
+                      Account_Last5Digits:
+                        type: string
+                        example: this may be removed depending on the admin's Account Role
+                      PaymentConfirmed:
+                        type: string
+                      LastEditedBy:
+                        type: string
+                        example: AccountId
+          Code_401:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Insufficient privileges
+        confirm_status:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                example: success!
+          Code_400:
+            type: object
+            properties:
+              token:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                example: Status not allowed OR Account not found
+          Code_401:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Insufficient privileges
+        confirm_payment:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                example: success
+          Code_400:
+            type: object
+            properties:
+              token:
+                
+                schema:
+                  $ref: "#/components/schemas/token"
+              message:
+                type: string
+                example: Account not found OR Not accepted OR Participant has given up their slot OR Account has not update payment data OR Payment has been refunded
+          Code_401:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Insufficient privileges
+          Code_403:
+            type: object
+            properties:
+              token:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                example: Not enough arguments
+        update_roles:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                example: success
+          Code_400:
+            type: object
+            properties:
+              token:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                example: Not enough arguments
+          Code_401:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Insufficient privileges
+          Code_403:
+            type: object
+            properties:
+              token:
+                access_token:
+                  type: string
+                token_type:
+                  type: string
+                  example: Bearer
+              message:
+                type: string
+                example: Cannot change role for self OR Invalid roles
+        view_logs:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              Logs:
+                type: object
+                properties:
+                  log:
+                    type: object
+                    properties:
+                      id:
+                        type: int
+                      AccountId:
+                        type: string
+                        example: AccountId
+                      AccountType:
+                        type: string
+                        example: PARTICIPANT / STAFF / ADMIN / DEVELOPER
+                      Details:
+                        type: string
+                      TimeStamp:
+                        type: string
+          Code_401:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Insufficient privileges
+        get_camp_status:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              CampStatus:
+                type: object
+                properties:
+                  Apply_Deadline_TimeStamp:
+                    type: string
+                  Allow_Registration:
+                    type: boolean
+                  Allow_Status_Lookup:
+                    type: boolean
+                  LastEditedBy:
+                    type: string
+                    example: AccountId
+          Code_401:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Insufficient privilege
+        edit_camp_status:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              CampStatus:
+                type: object
+                properties:
+                  Apply_Deadline_TimeStamp:
+                    type: string
+                  Allow_Registration:
+                    type: boolean
+                  Allow_Status_Lookup:
+                    type: boolean
+                  LastEditedBy:
+                    type: string
+                    example: AccountId
+          Code_401:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Insufficient privilege
+        search:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              AccountId:
+                type: object
+                properties:
+                  Account:
+                      type: object
+                      properties:
+                        Email:
+                          type: string
+                          example: example@gmail.com
+                        CreatedAt:
+                          type: string
+                        Role:
+                          type: string
+                          example: PARTICIPANT
+                        Status:
+                          type: string
+                  Profile:
+                    type: object
+                    properties:
+                      Name:
+                        type: string
+                      Gender:
+                        type: string
+                      School:
+                        type: string
+                      BirthDate:
+                        type: string
+                      ID_Document:
+                        type: string
+                        example: This may be removed depending on the staff's Account role
+                      ID_Validated:
+                        type: boolean
+                      PhoneNumber:
+                        type: string
+                      FoodType:
+                        type: string
+                      AllergySource:
+                        type: string
+                      Diseases:
+                        type: string
+                      ClothesSize:
+                        type: string
+                      SelfIntro:
+                        type: string
+                      Motivation:
+                        type: string
+                      Lang_Learned:
+                        type: string
+                      Lang_Mastered:
+                        type: string
+                      Emergency_ContactName:
+                        type: string
+                      Emergency_ContactNumber:
+                        type: string
+                      Emergency_ContactRelationship:
+                        type: string
+                      Facebook:
+                        type: string
+                      Github:
+                        type: sting
+                      Discord:
+                        type: string
+                  PaymentDetails:
+                    type: object
+                    properties:
+                      TransferDate:
+                        type: string
+                      AccountName:
+                        type: string
+                        example: this may be removed depending on the admin's Account Role
+                      Account_Last5Digits:
+                        type: string
+                        example: this may be removed depending on the admin's Account Role
+                      PaymentConfirmed:
+                        type: string
+                      LastEditedBy:
+                        type: string
+                        example: AccountId
+          Code_401:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Insufficient privilege
+      profile:
+        root:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: string
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              Profile:
+                type: object
+                properties:
+                  Name:
+                    type: string
+                  Gender:
+                    type: string
+                  School:
+                    type: string
+                  BirthDate:
+                    type: string
+                  ID_Document:
+                    type: string 
+                  ID_Validated:
+                    type: boolean
+                  PhoneNumber:
+                    type: string
+                  FoodType:
+                    type: string
+                  AllergySource:
+                    type: string
+                  Diseases:
+                    type: string
+                  ClothesSize:
+                    type: string
+                  SelfIntro:
+                    type: string
+                  Motivation:
+                    type: string
+                  Lang_Learned:
+                    type: string
+                  Lang_Mastered:
+                    type: string
+                  Emergency_ContactName:
+                    type: string
+                  Emergency_ContactNumber:
+                    type: string
+                  Emergency_ContactRelationship:
+                    type: string
+                  Facebook:
+                    type: string
+                  Github:
+                    type: sting
+                  Discord:
+                    type: string
+        update:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: string
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              StoredData:
+                type: object
+                properties:
+                  Name:
+                    type: string
+                  Gender:
+                    type: string
+                  School:
+                    type: string
+                  BirthDate:
+                    type: string
+                  ID_Document:
+                    type: string 
+                  ID_Validated:
+                    type: boolean
+                  PhoneNumber:
+                    type: string
+                  FoodType:
+                    type: string
+                  AllergySource:
+                    type: string
+                  Diseases:
+                    type: string
+                  ClothesSize:
+                    type: string
+                  SelfIntro:
+                    type: string
+                  Motivation:
+                    type: string
+                  Lang_Learned:
+                    type: string
+                  Lang_Mastered:
+                    type: string
+                  Emergency_ContactName:
+                    type: string
+                  Emergency_ContactNumber:
+                    type: string
+                  Emergency_ContactRelationship:
+                    type: string
+                  Facebook:
+                    type: string
+                  Github:
+                    type: sting
+                  Discord:
+                    type: string
+              InvalidData:
+                type: object
+              MissingData:
+                type: object
+          Code_401:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Well...at least you tried (User tried to include the Profile ID and AccountId )
+          Code_403:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Registration has not started OR You are XYZ seconds late :<
+      home:
+        root:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: string
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              Data:
+                type: object
+                properties:
+                  Applied:
+                    type: boolean
+                  Profile:
+                    type: boolean
+                  PassedTest:
+                    type: boolean
+                  GitHub:
+                    type: boolean
+        apply:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: string
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                example: success
+          Code_400:
+            type: object
+            properties:
+              token:
+                type: string
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                example: not enough arguments
+        complete_test:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: string
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                example: succes!
+          Code_400:
+            type: object
+            properties:
+              token:
+                type: string
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                example: CompletedTest is false or null
+        upload:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: string
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                example: Uploaded!
+          Code_400:
+            type: object
+            properties:
+              token:
+                type: string
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                example: Not accepted
+        update_payment:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: string
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                example: success!
+          Code_400:
+            type: object
+            properties:
+              token:
+                type: string
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                message: Missing PaymentData OR Not enough data OR Not accepted

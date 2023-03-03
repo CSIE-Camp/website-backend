@@ -1,5 +1,5 @@
 const { AuthenticateAccessToken } = require("../Middleware/AuthenticateToken");
-const { GetAccountStatus, UpdatePaymentData, FindAccountById, UploadConsentForm } = require("../Modules/Database");
+const { GetAccountStatus, UpdatePaymentData, FindAccountById, UploadConsentForm, CompleteTest } = require("../Modules/Database");
 
 const express = require("express");
 const crypto = require("crypto");
@@ -81,13 +81,14 @@ router.post("/complete-test", AuthenticateAccessToken, async (req, res) => {
 	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 	let AccountId = req.userid;
 	let AccountRole = req.role;
+	let CompletedTest = req.body.CompletedTest || false;
+	
 	let NewToken = await CompareRoles(AccountId, AccountRole, ip);
     let ReturnData = {};
     if (NewToken){
         ReturnData.tokens.access_token = NewToken;
         ReturnData.tokens.token_type = "Bearer";
     }
-	let CompletedTest = req.body.CompletedTest || false;
 	if (!CompletedTest){
 		ReturnData.message = "Test not completed!";
 		return res.status(400).json(ReturnData);
@@ -119,7 +120,7 @@ router.post("/upload", AuthenticateAccessToken, upload.single("ConsentForm"), as
 	return res.status(200).json(ReturnData);
 });
 
-router.post("/confirm-payment", AuthenticateAccessToken, async (req, res) => {
+router.post("/update-payment", AuthenticateAccessToken, async (req, res) => {
 	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 	let AccountId = req.userid;
 	let AccountRole = req.role;
@@ -153,7 +154,7 @@ router.post("/confirm-payment", AuthenticateAccessToken, async (req, res) => {
 	}
 	let Status = await UpdatePaymentData(AccountId, PaymentData);
 	ReturnData.message = Status ? "success" : "Not accepted!";
-	return res.status(200).json(ReturnData);
+	return res.status(Status ? 200 : 400).json(ReturnData);
 });
 
 module.exports = router;

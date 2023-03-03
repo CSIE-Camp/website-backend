@@ -59,12 +59,12 @@ async function RemoveImage(Path){
 	});
 }
 
-router.post("/update"/*, AuthenticateAccessToken*/, upload.single("selfPicture"), async (req, res) => {
+router.post("/update", AuthenticateAccessToken, upload.single("selfPicture"), async (req, res) => {
 	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 	let Profile = req.body;
 	Profile.ImagePath = req.imagepath;
-	let AccountId = "clemwblys0000slpov5m5ad74"; //req.userid;
-	let AccountRole = "DEVELOPER"; //req.role;
+	let AccountId = req.userid;
+	let AccountRole = req.role;
 	let ReturnData = {};
 	let Flags = {};
 	let CampStatus = await GetCampStatus();
@@ -84,7 +84,7 @@ router.post("/update"/*, AuthenticateAccessToken*/, upload.single("selfPicture")
 		if (Profile.ImagePath){
 			RemoveImage(Profile.ImagePath);
 		}
-		return res.status(403).json({ message: "Well...at least you tried" });
+		return res.status(401).json({ message: "Well...at least you tried" });
 	}
 	if (Profile.personalId){
 		let DocType = ValidateDocuments(Profile.personalId);
@@ -123,7 +123,7 @@ router.post("/update"/*, AuthenticateAccessToken*/, upload.single("selfPicture")
 			delete(Profile.foodType);
 			Flags.foodType = "沒有此選項";
 		} else {
-			Profile.foodType = Profile.foodType === "1" ? "葷食" : "素食";
+			Profile.foodType = Profile.foodType === "1" ? "葷" : "素";
 		}
 	}
 	if (Profile.travelHistory){
