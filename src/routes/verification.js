@@ -1,8 +1,5 @@
 const { EMAIL_TOKEN_SECRET } = require("./../config");
-const { EMAIL_TOKEN_SECRET } = require("./../config");
 
-const express = require("express");
-const jwt = require("jsonwebtoken");
 const express = require("express");
 const jwt = require("jsonwebtoken");
 
@@ -10,7 +7,6 @@ const {VerifyPendingAccount} = require("./../Modules/Database");
 const { SendVerifyEmail } = require("../Services/EmailService");
 const { GenerateTempAccessToken } = require("../Modules/Tokens");
 
-const router = express.Router();
 const router = express.Router();
 
 router.get("/email/:token", async (req, res) => {

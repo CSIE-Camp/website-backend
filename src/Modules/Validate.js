@@ -1,32 +1,22 @@
 const IDRegex = /^[A-Z][1,2]\d{8}$/;
 const NARCRegex = /^[A-Z][8,9]\d{8}$/;
 const OARCRegex = /^[A-Z]{2}\d{8}$/;
-const IDRegex = /^[A-Z][1,2]\d{8}$/;
-const NARCRegex = /^[A-Z][8,9]\d{8}$/;
-const OARCRegex = /^[A-Z]{2}\d{8}$/;
 
 function Zip(a1, a2, f) {
-	const length = Math.min(a1.length, a2.length);
-	const result = [];
 	const length = Math.min(a1.length, a2.length);
 	const result = [];
 	for (let i = 0; i < length; i++)
 		result[i] = f(a1[i], a2[i]);
 	return result;
-		result[i] = f(a1[i], a2[i]);
-	return result;
 }
 function Add(a, b) {
-	return a + b;
 	return a + b;
 }
 function Multiply(a, b) {
 	return a * b;
-	return a * b;
 }
 
 function VerifyIntermediate(input) {
-	const intRadix = 10;
 	const intRadix = 10;
 
 	const TAIWAN_ID_LOCALE_CODE_LIST = [1, 10, 19, 28, 37, 46, 55, 64, 39, 73, 82, 2, 11, 20, 48, 29, 38, 47, 56, 65, 74, 83, 21, 3, 12, 30];
@@ -36,15 +26,9 @@ function VerifyIntermediate(input) {
 	const secondDigit = isNaN(parseInt(input[1], intRadix))
 		? RESIDENT_CERTIFICATE_NUMBER_LIST[getCharOrder(input, 1)]
 		: parseInt(input[1], intRadix);
-		: parseInt(input[1], intRadix);
 	const rest = input
 		.substring(2)
 		.split("")
-		.map(n => parseInt(n, intRadix));
-	const idInDigits = [firstDigit, secondDigit, ...rest];
-	const ID_COEFFICIENTS = [1, 8, 7, 6, 5, 4, 3, 2, 1, 1];
-	const sum = Zip(idInDigits, ID_COEFFICIENTS, Multiply).reduce(Add, 0);
-	return sum % 10 === 0;
 		.map(n => parseInt(n, intRadix));
 	const idInDigits = [firstDigit, secondDigit, ...rest];
 	const ID_COEFFICIENTS = [1, 8, 7, 6, 5, 4, 3, 2, 1, 1];
@@ -54,20 +38,16 @@ function VerifyIntermediate(input) {
 
 function ValidateID(id) {
 	return IDRegex.test(id) && VerifyIntermediate(id) && typeof id == "string";
-	return IDRegex.test(id) && VerifyIntermediate(id) && typeof id == "string";
 }
 
 function ValidateARC(arc) {
 	if (typeof arc !== "string" || !VerifyIntermediate(arc)) {
 		return;
-		return;
 	}
 	if (NARCRegex.test(arc)) {
 		return "New_ARC";
-		return "New_ARC";
 	}
 	if (OARCRegex.test(arc)) {
-		return "Old_ARC";
 		return "Old_ARC";
 	}
 }
@@ -77,7 +57,6 @@ function ValidateDocuments(Document) {
 		return `Taiwanese_Id|${Document}`;
 	}
 	let ARCType = ValidateARC(Document);
-	let ARCType = ValidateARC(Document);
 	if (ARCType) {
 		return `${ARCType}|${Document}`;
 	}
@@ -85,34 +64,26 @@ function ValidateDocuments(Document) {
 }
 
 const PhoneRegex = /\(??(0\d{1,2}?)\)??(\s*?|-??)(\d{3,4}(\s*?|-??)\d{3,4})/;
-const PhoneRegex = /\(??(0\d{1,2}?)\)??(\s*?|-??)(\d{3,4}(\s*?|-??)\d{3,4})/;
 function IsValidNumber(number) {
 	return PhoneRegex.test(number) && typeof number == "string";
-	return PhoneRegex.test(number) && typeof number == "string";
 }
 
 const EmailRegex = /.+@.+\..+/;
-const EmailRegex = /.+@.+\..+/;
 function IsValidEmail(email) {
-	return EmailRegex.test(email) && typeof email == "string";
 	return EmailRegex.test(email) && typeof email == "string";
 }
 
 
 function IsValidEmail(email) {
 	return EmailRegex.test(email) && typeof email == "string";
-	return EmailRegex.test(email) && typeof email == "string";
 }
 
-const Sha512Regex = /[0-9a-fA-F]{128}$/;
 const Sha512Regex = /[0-9a-fA-F]{128}$/;
 function IsValidPassword(String) {
-	return Sha512Regex.test(String) && String.length === 128;
 	return Sha512Regex.test(String) && String.length === 128;
 }
 
 function IsValidString(String) {
-	return typeof String === "string" && String.split(" ").join("") != "";
 	return typeof String === "string" && String.split(" ").join("") != "";
 }
 

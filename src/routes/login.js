@@ -3,11 +3,6 @@ const { ACCESS_TOKEN_SECRET, ACCESS_TOKEN_EXPIRE, RESET_PASSWORD_SECRET, REFRESH
 const bcrypt = require("bcrypt");
 const express = require("express");
 const jwt = require("jsonwebtoken");
-const redis = require("redis");
-const { randomBytes } = require("crypto");
-const bcrypt = require("bcrypt");
-const express = require("express");
-const jwt = require("jsonwebtoken");
 
 const { GenerateAccessToken, GenerateRefreshToken, RevokeRefreshToken, GenerateTempAccessToken, RevokeAllRefreshTokens, FindRefreshToken } = require("./../Modules/Tokens");
 const { IsValidEmail, IsValidString, IsValidPassword } = require("../Modules/Validate");
@@ -168,5 +163,4 @@ router.delete("/", AuthenticateAccessToken, async (req, res) => { //logging out
 	});
 });
 
-module.exports = router;
 module.exports = router;

@@ -2,8 +2,14 @@ FROM node:latest
 
 WORKDIR /app
 
+COPY package*.json ./
+
+RUN npm install
+
 COPY . .
 
-RUN npm install && npm cache clean --force && npm rebuild
+EXPOSE 8080
+
+RUN npx prisma generate
 
 CMD ["npm", "run", "dev"]

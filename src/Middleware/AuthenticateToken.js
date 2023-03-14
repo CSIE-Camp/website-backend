@@ -1,5 +1,4 @@
 const { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET, EMAIL_TOKEN_SECRET, TEMP_ACCESS_SECRET} = require("./../config");
-const { FindRefreshToken } = require("./../Modules/Tokens");
 const jwt = require("jsonwebtoken");
 
 function AuthenticateAccessToken(req, res, next){
