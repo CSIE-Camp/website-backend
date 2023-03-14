@@ -5,6 +5,7 @@ services:
     build: .
     ports: 
       - "8080:8080"
+    container_name: server
   db:
     image: postgres:latest
     restart: unless-stopped
@@ -14,7 +15,16 @@ services:
     expose:
       - 5432:5432
     volumes:
-      - db-data:/test
+      - db-data:/database
+  redis:
+    image: redis:latest
+    restart: unless-stopped
+    container_name: redis
+    expose:
+      - 6379:6379
+    volumes:
+      - redis:/redis
 
 volumes:
   db-data:
+  redis:
