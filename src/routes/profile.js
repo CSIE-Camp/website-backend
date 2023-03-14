@@ -27,7 +27,10 @@ const upload = multer({
 		if (file.mimetype !== "image/jpg" && file.mimetype !== "image/jpeg" && file.mimetype != "image/png") {
 			cb(null, false);
 			return cb(new Error("Only PNG, JPG and JPEG files are accepted!"));
+			cb(null, false);
+			return cb(new Error("Only PNG, JPG and JPEG files are accepted!"));
 		}
+		cb(null, true);
 		cb(null, true);
 	},
 	limits: {
@@ -167,4 +170,5 @@ router.post("/update", AuthenticateAccessToken, upload.single("selfPicture"), as
 	return res.status(200).json(ReturnData);
 });
 
+module.exports = router;
 module.exports = router;

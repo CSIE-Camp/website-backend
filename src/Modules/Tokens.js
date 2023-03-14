@@ -8,9 +8,11 @@ const redis = require("redis");
 const REDIS_REFRESH_TOKEN_FIELD = "refresh_tokens";
 
 const RedisClient = redis.createClient();
+const RedisClient = redis.createClient();
 
 async function CheckRedisConnection(){
 	if (!RedisClient.isOpen){
+		return RedisClient.connect();
 		return RedisClient.connect();
 	}
 }
@@ -21,6 +23,7 @@ async function GenerateAccessToken(userid, Role,  ip) {
 			CreatedByIp: ip,
 			Role: Role,
 			CreatedAt: Date.now(),
+			Expires: ACCESS_TOKEN_EXPIRE,
 			Expires: ACCESS_TOKEN_EXPIRE,
 		},
 		ACCESS_TOKEN_SECRET,

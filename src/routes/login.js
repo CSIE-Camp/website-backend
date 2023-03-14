@@ -1,5 +1,8 @@
 const { ACCESS_TOKEN_SECRET, ACCESS_TOKEN_EXPIRE, RESET_PASSWORD_SECRET, REFRESH_TOKEN_SECRET, SALTROUNDS} = require("./../config");
 
+const bcrypt = require("bcrypt");
+const express = require("express");
+const jwt = require("jsonwebtoken");
 const redis = require("redis");
 const { randomBytes } = require("crypto");
 const bcrypt = require("bcrypt");
@@ -73,7 +76,6 @@ router.post("/refresh", AuthenticateRefreshToken, async (req, res) => {
 		},
 	});
 });
-
 //send email for forget password
 router.post("/password/reset", async (req, res) => {
 	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
@@ -95,9 +97,12 @@ router.get("/password/reset/:token", async (req, res) => {
 	let token = req.params.token;
 	if (!token) {
 		return res.status(403).json({ message: "Missing token" });
+		return res.status(403).json({ message: "Missing token" });
 	}
 	jwt.verify(token, RESET_PASSWORD_SECRET, async (err, decoded) => {
 		if (err) {
+			console.log(err);
+			return res.status(403).json({ message: "Invalid token" });
 			console.log(err);
 			return res.status(403).json({ message: "Invalid token" });
 		}
@@ -163,4 +168,5 @@ router.delete("/", AuthenticateAccessToken, async (req, res) => { //logging out
 	});
 });
 
+module.exports = router;
 module.exports = router;

@@ -1,6 +1,4 @@
-const {DEV_MODE} = require("./../config");
 const { PrismaClient } = require("@prisma/client");
-const e = require("express");
 
 const prisma = new PrismaClient;
 
@@ -157,7 +155,6 @@ async function GetEmergencyInfo(AccountId) {
 	let EmergencyData = await prisma.profiles.findMany({
 		where: {
 			id: AccountId,
-
 		},
 		select: {
 			Emergency_BloodType: true,
