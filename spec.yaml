@@ -1,135 +1,1770 @@
-openapi: 3.0.0
+openapi: 3.0.3
 info:
-    title: NTNU CSIE Camp API
-    description: NTNU CSIE Camp API
-    version: "1.0.0"
-servers:
-    - url: https://server.com
-        description: SwaggerHub API Auto Mocking
-paths:
-    /signup:
-        post:
-            summary: 註冊
-            description: 註冊
-            requestBody:
-                required: true
-                content:
-                    application/json:
-                        schema:
-                            $ref: "#/components/schemas/RegisterPayload"
-            responses:
-                "200":
-                    description: Always 200
-                    content:
-                        application/json:
-                            schema:
-                                $ref: "#/components/schemas/AuthResponse"
-    /login:
-        post:
-            summary: 登入
-            description: 登入
-            requestBody:
-                required: true
-                content:
-                    application/json:
-                        schema:
-                            $ref: "#/components/schemas/loginPayload"
-            responses:
-                "200":
-                    description: Always 200
-                    content:
-                        application/json:
-                            schema:
-                                $ref: "#/components/schemas/AuthResponse"
-    /profile/update:
-        post:
-
+  title: NTNU CSIE Camp API Documentation
+  description: |-
+    NTNU CSIE Camp API documentation
+    Note: Please remember to check for "token" in all response body. a new access_token will be returned IF the user's role has been changed while logged in.
+    Some useful links:
+    - [Backend repository](https://github.com/CSIE-Camp/website-backend)
+    - [Camp website](https://camp.csie.cool)
     
-    /profile:
-        get:
+  version: 1.0.0-oas3
 
-    /verification:
-        get:
+servers:
+  - url: https://server.com
 
+tags:
+  - name: Signup
+  - name: Login
+  - name: Profile
+  - name: Admin
+  - name: Home
+
+paths:
+  /signup/email:
+    post:
+      tags:
+        - Signup
+      summary: First step of account creation
+      description: The user should submit their email
+      requestBody:
+        description: Submits the user inputted email
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/request/signup/email"
+      responses:
+        "200":
+          description: >-
+            Successfully send verification email. Ask the user to verify their
+            email
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/signup/email/Code_200"
+        "400":
+          description: Password was null or empty
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/signup/email/Code_400"
+        "403":
+          description: Email is in use
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/signup/email/Code_403"
+        "500":
+          description: Unexpected errors
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/signup/email/Code_500"
+
+  /signup/password:
+    post:
+      tags:
+        - Signup
+      summary: Final step of account creation
+      description: >-
+        The user should submit their password. Passwords should be validated on
+        the front end.
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: >-
+          The submitted data should be in a SHA512 hash.Passwords should be
+          validated on the front end.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/request/signup/password"
+      responses:
+        "200":
+          description: Successfully created the account. Ask the user to login
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/signup/password/Code_200"
+        "400":
+          description: Password was null or empty
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/signup/password/Code_400"
+        "403":
+          description: Account exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/signup/password/Code_403"
+        "418":
+          description: Provided password was not a hex digest of a SHA512 hash
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/signup/password/Code_418"
+        "500":
+          description: Unexpected errors
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/signup/password/Code_500"
+
+
+  /login:
+    post:
+      tags:
+        - Login
+      summary: Login
+      description: Logs in the user
+      requestBody:
+        description: >-
+          The user should submit their email and password. Password should be
+          the hex digest of a SHA512 hash of the inputted password
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/request/login/root_login"
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/root_login/Code_200"
+        "400":
+          description: Invalid data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/root_login/Code_400"
+        "401":
+          description: Account does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/root_login/Code_201"
+        "403":
+          description: Incorrect email or password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/root_login/Code_403"
+        "418":
+          description: Password was not a SHA512 hash
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/root_login/Code_418"
+        "500":
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/root_login/Code_500"
+    delete:
+      tags:
+        - Login
+      summary: Log out
+      description: Logs out the user
+      requestBody:
+        description: >-
+          Put the access token in the Authorization header. Please be reminded
+          to delete the access token and refresh token from the browser's
+          storage
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/request/login/root_logout"
+      responses:
+        "200":
+          description: No response body
+        "400":
+          description: Token is null
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/root_login/Code_400"
+        "401":
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/root_login/Code_401"
+        "403":
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/root_login/Code_403"
+        
+
+  /login/refresh:
+    post:
+      tags:
+        - Login
+      summary: Refresh access token
+      description: Refreshes the access token with refresh token
+      requestBody:
+        description: >-
+          Submit the refresh token in the header "Authorization" field
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/root_login/Code_200"
+        "401":
+          description: Token does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/root_login/Code_401"
+  /login/password/reset:
+    post:
+      tags:
+        - Login
+      summary: For resetting password with email
+      description: Link for resetting passwword will be sent after receiving email
+      requestBody:
+        description: >-
+          Submit the email
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/request/login/password_reset"
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/password_reset/Code_200"
+        "401":
+          description: Account does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/password_reset/Code_401"
+        "500":
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/password_reset/Code_500"
+
+  /login/password/update:
+    post:
+      tags:
+        - Login
+      summary: Set new password
+      description: Submit email and new password to set the new password
+      requestBody:
+        description: >-
+          Submit email and hashed new password
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/request/login/password_update"
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/password_update/Code_200"
+        "400":
+          description: Invalid data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/password_update/Code_400"
+        "418":
+          description: Provided password was not a hex digest of a SHA512 hash
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/password_update/Code_418"
+        "500":
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/login/password_update/Code_500"
+
+  /admin/view-profile/{id}:
+    get:
+      tags:
+        - Admin
+      summary: Gets the given Account(s) profile
+      description: Retrieves the Account(s) profile
+      parameters:
+        - in: path
+          name: id
+          schema:
+            $ref: "#/components/schemas/request/admin/view_profile"
+          required: true
+          description: null or AccountId
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/view_profile/Code_200"
+        "401":
+          description: Insufficient privileges
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/view_profile/Code_401"
+
+  /admin/confirm-status:
+    post:
+      tags:
+        - Admin
+      summary: Modify application status
+      description: Change target account's application status
+      requestBody:
+        description: Submit target account id and application status
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/request/admin/confirm_status"
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/confirm_status/Code_200"
+        "400":
+          description: Invalid data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/confirm_status/Code_400"
+        "401":
+          description: Insufficient privileges
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/confirm_status/Code_401"
+        "403":
+          description: Not enough arguments 
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/confirm_status/Code_403"
+        
+  /admin/confirm-payment:
+    post:
+      tags:
+        - Admin
+      summary: Modify payment status
+      description: Change target account's payment status
+      requestBody:
+        description: >-
+          Submit target account id
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/request/admin/confirm_payment"
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/confirm_payment/Code_200"
+
+        "400":
+          description: Invalid data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/confirm_payment/Code_400"
+
+        "401":
+          description: Insufficient privileges or not enough arguments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/confirm_payment/Code_401"
+       
+        "403":
+          description: Not enough arguments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/confirm_payment/Code_403"
+
+  /admin/update-roles:
+    post:
+      tags:
+        - Admin
+      summary: Promote target account's role
+      description: Promote account to staff or admin
+      requestBody:
+        description: >-
+          Submit target account id and new role
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/request/admin/update_roles"
+
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/update_roles/Code_200"
+        "400":
+          description: Not enough arguments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/update_roles/Code_400"
+
+        "401":
+          description: Insufficient privileges
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/update_roles/Code_401"
+
+        "403":
+          description: Attempted to change own role OR Invalid role
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/update_roles/Code_403"
+
+  /admin/view-logs/{TargetAccount}:
+    get:
+      tags:
+        - Admin
+      summary: View logs for account
+      description: Let admins view all logs for an account
+      parameters:
+        - in: path
+          name: TargetAccount
+          required: true
+          schema:
+            $ref: "#/components/schemas/request/admin/view_logs"
+          description: AccountId
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/view_logs/Code_200"
+        "401":
+          description: Insufficient privileges
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/view_logs/Code_401"
+
+  /admin/get-camp-status:
+    get:
+      tags:
+        - Admin
+      summary: Get status of camp
+      description: Get status of camp
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/get_camp_status/Code_200"
+        "401":
+          description: Insufficienmt privileges
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/get_camp_status/Code_401"
+  /admin/edit-camp-status:
+    post:
+      tags:
+        - Admin
+      summary: Change status of camp
+      description: Change status of camp
+      requestBody:
+        description: >-
+          Submit new status
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/request/admin/edit_camp_status"
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/edit_camp_status/Code_200"
+        "401":
+          description: Insufficient privileges
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/edit_camp_status/Code_401"
+
+  /admin/search:
+    post:
+      tags:
+        - Admin
+      summary: Search for participant
+      description: Search for a specific participant's or everyone's data
+      requestBody:
+        description: >-
+          Submit name for specific participant or "" for everyone
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/request/admin/search"
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/search/Code_200"
+        "403":
+          description: Insufficient privileges
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/admin/search/Code_401"
+
+  /profile:
+    get:
+      tags:
+        - Profile
+      summary: Get users profile
+      description: Get profile of the user themself
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/profile/root/Code_200"
+
+  /profile/update:
+    post:
+      tags:
+        - Profile
+      summary: Updates user's profile
+      description: Submit new profile to update
+      requestBody:
+        description: >-
+          Submit profile
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/request/profile/update"
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/profile/update/Code_200"
+        "401":
+          description: Attempted to temper with profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/profile/update/Code_401"
+        "403":
+          description: Registration not started / Registration ended
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/profile/update/Code_403"
+
+  /home:
+    get:
+      tags:
+        - home
+      summary: Get Account Status
+      description: Retrieves the Account profile
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/home/root/Code_200"
+
+
+  /home/apply:
+    post:
+      tags:
+        - home
+      summary: Applies to NTNU CSIE Camp 2023
+      description: Applies to NTNU CSIE Camp 2023
+      requestBody:
+        description:  request body for home/apply
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/request/home/apply"
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/home/apply/Code_200"
+        "400":
+          description: Not enough arguments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/home/apply/Code_400"
+  
+  /home/complete-test:
+    post:
+      tags:
+        - home
+      summary: Completes the test
+      description: Singals the backend that the user has completed the test
+      requestBody:
+        description: body
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/request/home/complete_test"
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/home/complete_test/Code_200"
+        "400":
+          description: CompletedTest is false or null
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/home/complete_test/Code_400"
+
+  /home/upload:
+    post:
+      tags:
+        - home
+      summary: Submits the consent form
+      description: Submits consent form
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/request/home/upload"
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/home/upload/Code_200"
+        "400":
+          description: Not accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/home/upload/Code_400"
+
+  /home/update-payment:
+    post:
+      tags:
+        - home
+      summary: Updates payment data
+      description: Updates payment data
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/request/home/update_payment"
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/home/update_payment/Code_200"
+        "400":
+          description: Failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response/home/update_payment/Code_400"
 components:
-    securitySchemes:
-        bearer:
-            type: http
-            scheme: bearer
-            bearerFormat: JWT
-    schemas:
-        Response:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: Bearer
+      bearerFormat: JWT
+
+  schemas:
+    request:
+      signup:
+        email:
+          type: object
+          properties:
+            email:
+              type: string
+              example: example@gmail.com
+        password:
+          type: object
+          properties:
+            password:
+              type: string
+              example: 9cba73c31ac15d21512382ce6b21e83f8b9fddd31196ff4f54559a8e29add1e3bc4038c86c9bee7512d0d8ea72ec9480580dc677a9f172b46366ecb5198615cc
+      login:
+        root_login:
+          type: object
+          properties:
+            email:
+              type: string
+              example: example@gmail.com
+            password:
+              type: string
+              example: 9cba73c31ac15d21512382ce6b21e83f8b9fddd31196ff4f54559a8e29add1e3bc4038c86c9bee7512d0d8ea72ec9480580dc677a9f172b46366ecb5198615cc
+        root_logout:
+          type: object
+          properties:
+            refresh_token:
+              type: string
+        password_reset:
+          type: object
+          properties:
+            email:
+              type: string
+              example: example@gmail.com
+        password_update:
+          type: object
+          properties:
+            password:
+              type: string
+              example: 9cba73c31ac15d21512382ce6b21e83f8b9fddd31196ff4f54559a8e29add1e3bc4038c86c9bee7512d0d8ea72ec9480580dc677a9f172b46366ecb5198615ch
+      admin:
+        view_profile:
+          type: string
+          example: AccountId
+        confirm_status:
+          type: object
+          properties:
+            TargetAccount:
+              type: string
+              example: AccountId
+            NewStatus:
+              type: string
+              example: STAFF / ACCEPTED / WAITLIST_ACCEPTED / WAITLIST / REJECTED
+        confirm_payment:
+          type: object
+          properties:
+            TargetAccount:
+              type: string
+              example: AccountId
+        update_roles:
+          type: object
+          properties:
+            TargetAccount:
+              type: string
+              example: AccountId
+            NewRole:
+              type: string
+              example: PARTICIPANT / STAFF / ADMIN
+        view_logs:
+          type: string
+          example: AccountId
+        edit_camp_status:
+          type: object
+          properties:
+            Apply_Deadline_TimeStamp:
+              type: string
+              example: Unix Timestamp (In seconds)
+            Allow_Registration:
+              type: boolean
+            Allow_Status_Lookup:
+              type: boolean
+        search:
+          type: object
+          properties:
+            Name:
+              type: string
+      profile:
+        update:
+          type: object
+          properties:
+            name:
+              type: string
+            gender:
+              type: string
+            school:
+              type: string
+            birthDate:
+              type: string
+            personalId:
+              type: string
+            phoneNumber:
+              type: string
+            bloodType:
+              type: string
+            fbLink:
+              type: string
+            parentName:
+              type: string
+            relation:
+              type: string
+            parentPhoneNumber:
+              type: string
+            travelHistory:
+              type: string
+            foodType:
+              type: string
+            allergySource:
+              type: string
+            disease:
+              type: string
+            clothesSize:
+              type: string
+            selfIntro:
+              type: string
+            motivation:
+              type: string
+            selfPicture:
+              type: string
+            lanlearned:
+              type: string
+            lanMaster:
+              type: string
+            selfPicture:
+              type: string
+              format: binary
+      home:
+        apply:
+          type: object
+          properties:
+            apply:
+              type: boolean
+        complete_test:
+          type: object
+          properties:
+            CompletedTest:
+              type: boolean
+        upload:
+          type: object
+          properties:
+            ConsentForm:
+              type: string
+              format: binary
+        update_payment:
+          type: object
+          properties:
+            PaymentData:
+              TransferDate:
+                type: string
+              AccountName:
+                type: string
+              Account_Last5Digits:
+                type: string
+          
+    response:
+      signup:
+        email:
+          Code_200:
+            type: object
             properties:
-                success:
-                    title: Response.success
-                    description: 操作成功？
-                    type: boolean
-                data:
-                    title: Response.data
-                    description: 資料，如果有
+              message:
+                type: string
+                example: Please verify your email
+          Code_400:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Invalid email
+          Code_403:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Email has been registered to an account, sign in instead!
+          Code_500:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Internal server error
+        password:
+          Code_200:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Account Created!
+          Code_400:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Password not provided
+          Code_403:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Email has been registered to an account, sign in instead!
+          Code_418:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Are you a teapot? (Password is not the hex digest of a SHA512 hash, probably tempered)
+          Code_500:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Internal Server Error OR Unexpected error occured! Please try again later!
+      login:
+        root_login:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              Account:
+                type: object
+                properties:
+                  Role:
+                    type: string
+                  Status:
                     type: object
-                err:
                     properties:
-                        title:
-                            title: Response.err.title
-                            type: string
-                        message:
-                            title: Response.err.message
-                            type: string
-                    required:
-                        - title
-                        - message
-                    additionalProperties: false
-                    title: Response.err
-                    description: 失敗，錯誤資訊
+                      Applied:
+                        type: boolean
+                      Profile:
+                        type: boolean
+                      PassedTest:
+                        type: boolean
+                      GitHub:
+                        type: boolean
+          Code_400:
+            type: object
+            properties:
+              message:
+                type: string
+                example: email or password cannot be null or empty
+          Code_401:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Account does not exist
+          Code_403:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Incorrect email or password
+          Code_418:
+            type: object
+            properties:
+              message:
+                type: string
+                example: I like green tea (Tempered password field or password not submitted as hex output of SHA512 digest)
+          Code_500:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unexpected error
+        root_logout:
+          Code_400:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Refresh token cannot be null! OR Token not found!
+          Code_401:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Invalid token"
+          Code_403:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Invalid token
+        refresh:
+          Code_200:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Access token generated
+              token:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+          Code_401:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Token does not exist
+        password_reset:
+          Code_200:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Please check your email
+          Code_401:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Account not found
+          Code_500:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Internal Server Error!
+        password_update:
+          Code_200:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Password updated! Logged out from all other devices
+          Code_400:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Password not provided 
+          Code_418:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Are you a teapot? (tempered data or not hex string of SHA512 digest)
+          Code_500:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Internal server error
+      admin:
+        view_profile:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              ProfileData:
+                type: object
+                properties:
+                  Account:
                     type: object
-                token:
-                    title: Response.token
-                    description: 如果該操作會影響使用者包含在 JWT 內的狀態，則需核發新的 JWT，或用於續簽
-                    type: string
-            required:
-                - success
-            additionalProperties: false
-            title: Response
-            description: API Response
+                    properties:
+                      Email:
+                        type: string
+                        example: example@gmail.com
+                      CreatedAt:
+                        type: string
+                      Role:
+                        type: string
+                        example: PARTICIPANT
+                      Status:
+                        type: string
+                  Profile:
+                    type: object
+                    properties:
+                      Name:
+                        type: string
+                      Gender:
+                        type: string
+                      School:
+                        type: string
+                      BirthDate:
+                        type: string
+                      ID_Document:
+                        type: string
+                        example: This may be removed depending on the staff's Account role
+                      ID_Validated:
+                        type: boolean
+                      PhoneNumber:
+                        type: string
+                      FoodType:
+                        type: string
+                      AllergySource:
+                        type: string
+                      Diseases:
+                        type: string
+                      ClothesSize:
+                        type: string
+                      SelfIntro:
+                        type: string
+                      Motivation:
+                        type: string
+                      Lang_Learned:
+                        type: string
+                      Lang_Mastered:
+                        type: string
+                      Emergency_ContactName:
+                        type: string
+                      Emergency_ContactNumber:
+                        type: string
+                      Emergency_ContactRelationship:
+                        type: string
+                      Facebook:
+                        type: string
+                      Github:
+                        type: sting
+                      Discord:
+                        type: string
+                  PaymentDetails:
+                    type: object
+                    properties:
+                      TransferDate:
+                        type: string
+                      AccountName:
+                        type: string
+                        example: this may be removed depending on the admin's Account Role
+                      Account_Last5Digits:
+                        type: string
+                        example: this may be removed depending on the admin's Account Role
+                      PaymentConfirmed:
+                        type: string
+                      LastEditedBy:
+                        type: string
+                        example: AccountId
+          Code_401:
             type: object
-        RegisterPayload:
             properties:
-                email:
-                    title: RegisterPayload.email
-                    description: 使用者電子郵件
-                    type: string
-                password:
-                    title: RegisterPayload.password
-                    description: 使用者密碼
-                    type: string
-            required:
-                - email
-                - password
-                - comfirmPassword
-            additionalProperties: false
-            title: RegisterPayload
+              message:
+                type: string
+                example: Insufficient privileges
+        confirm_status:
+          Code_200:
             type: object
-        loginPayload:
             properties:
-                email:
-                    title: loginPayload.email
-                    description: 使用者電子郵件
+              token:
+                type: object
+                properties:
+                  access_token:
                     type: string
-                password:
-                    title: loginPayload.password
-                    description: 使用者密碼
+                  token_type:
                     type: string
-            required:
-                - email
-                - password
-            additionalProperties: false
-            title: LoginPayload
+                    example: Bearer
+              message:
+                type: string
+                example: success!
+          Code_400:
             type: object
-        AuthResponse:
-            allOf:
-                - $ref: "#/components/schemas/Response"
-            additionalProperties: false
-            title: AuthResponse
+            properties:
+              token:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                example: Status not allowed OR Account not found
+          Code_401:
             type: object
-            
+            properties:
+              message:
+                type: string
+                example: Insufficient privileges
+        confirm_payment:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                example: success
+          Code_400:
+            type: object
+            properties:
+              token:
+                
+                schema:
+                  $ref: "#/components/schemas/token"
+              message:
+                type: string
+                example: Account not found OR Not accepted OR Participant has given up their slot OR Account has not update payment data OR Payment has been refunded
+          Code_401:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Insufficient privileges
+          Code_403:
+            type: object
+            properties:
+              token:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                example: Not enough arguments
+        update_roles:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                example: success
+          Code_400:
+            type: object
+            properties:
+              token:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                example: Not enough arguments
+          Code_401:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Insufficient privileges
+          Code_403:
+            type: object
+            properties:
+              token:
+                access_token:
+                  type: string
+                token_type:
+                  type: string
+                  example: Bearer
+              message:
+                type: string
+                example: Cannot change role for self OR Invalid roles
+        view_logs:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              Logs:
+                type: object
+                properties:
+                  log:
+                    type: object
+                    properties:
+                      id:
+                        type: int
+                      AccountId:
+                        type: string
+                        example: AccountId
+                      AccountType:
+                        type: string
+                        example: PARTICIPANT / STAFF / ADMIN / DEVELOPER
+                      Details:
+                        type: string
+                      TimeStamp:
+                        type: string
+          Code_401:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Insufficient privileges
+        get_camp_status:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              CampStatus:
+                type: object
+                properties:
+                  Apply_Deadline_TimeStamp:
+                    type: string
+                  Allow_Registration:
+                    type: boolean
+                  Allow_Status_Lookup:
+                    type: boolean
+                  LastEditedBy:
+                    type: string
+                    example: AccountId
+          Code_401:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Insufficient privilege
+        edit_camp_status:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              CampStatus:
+                type: object
+                properties:
+                  Apply_Deadline_TimeStamp:
+                    type: string
+                  Allow_Registration:
+                    type: boolean
+                  Allow_Status_Lookup:
+                    type: boolean
+                  LastEditedBy:
+                    type: string
+                    example: AccountId
+          Code_401:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Insufficient privilege
+        search:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              AccountId:
+                type: object
+                properties:
+                  Account:
+                      type: object
+                      properties:
+                        Email:
+                          type: string
+                          example: example@gmail.com
+                        CreatedAt:
+                          type: string
+                        Role:
+                          type: string
+                          example: PARTICIPANT
+                        Status:
+                          type: string
+                  Profile:
+                    type: object
+                    properties:
+                      Name:
+                        type: string
+                      Gender:
+                        type: string
+                      School:
+                        type: string
+                      BirthDate:
+                        type: string
+                      ID_Document:
+                        type: string
+                        example: This may be removed depending on the staff's Account role
+                      ID_Validated:
+                        type: boolean
+                      PhoneNumber:
+                        type: string
+                      FoodType:
+                        type: string
+                      AllergySource:
+                        type: string
+                      Diseases:
+                        type: string
+                      ClothesSize:
+                        type: string
+                      SelfIntro:
+                        type: string
+                      Motivation:
+                        type: string
+                      Lang_Learned:
+                        type: string
+                      Lang_Mastered:
+                        type: string
+                      Emergency_ContactName:
+                        type: string
+                      Emergency_ContactNumber:
+                        type: string
+                      Emergency_ContactRelationship:
+                        type: string
+                      Facebook:
+                        type: string
+                      Github:
+                        type: sting
+                      Discord:
+                        type: string
+                  PaymentDetails:
+                    type: object
+                    properties:
+                      TransferDate:
+                        type: string
+                      AccountName:
+                        type: string
+                        example: this may be removed depending on the admin's Account Role
+                      Account_Last5Digits:
+                        type: string
+                        example: this may be removed depending on the admin's Account Role
+                      PaymentConfirmed:
+                        type: string
+                      LastEditedBy:
+                        type: string
+                        example: AccountId
+          Code_401:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Insufficient privilege
+      profile:
+        root:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: string
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              Profile:
+                type: object
+                properties:
+                  Name:
+                    type: string
+                  Gender:
+                    type: string
+                  School:
+                    type: string
+                  BirthDate:
+                    type: string
+                  ID_Document:
+                    type: string 
+                  ID_Validated:
+                    type: boolean
+                  PhoneNumber:
+                    type: string
+                  FoodType:
+                    type: string
+                  AllergySource:
+                    type: string
+                  Diseases:
+                    type: string
+                  ClothesSize:
+                    type: string
+                  SelfIntro:
+                    type: string
+                  Motivation:
+                    type: string
+                  Lang_Learned:
+                    type: string
+                  Lang_Mastered:
+                    type: string
+                  Emergency_ContactName:
+                    type: string
+                  Emergency_ContactNumber:
+                    type: string
+                  Emergency_ContactRelationship:
+                    type: string
+                  Facebook:
+                    type: string
+                  Github:
+                    type: sting
+                  Discord:
+                    type: string
+        update:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: string
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              StoredData:
+                type: object
+                properties:
+                  Name:
+                    type: string
+                  Gender:
+                    type: string
+                  School:
+                    type: string
+                  BirthDate:
+                    type: string
+                  ID_Document:
+                    type: string 
+                  ID_Validated:
+                    type: boolean
+                  PhoneNumber:
+                    type: string
+                  FoodType:
+                    type: string
+                  AllergySource:
+                    type: string
+                  Diseases:
+                    type: string
+                  ClothesSize:
+                    type: string
+                  SelfIntro:
+                    type: string
+                  Motivation:
+                    type: string
+                  Lang_Learned:
+                    type: string
+                  Lang_Mastered:
+                    type: string
+                  Emergency_ContactName:
+                    type: string
+                  Emergency_ContactNumber:
+                    type: string
+                  Emergency_ContactRelationship:
+                    type: string
+                  Facebook:
+                    type: string
+                  Github:
+                    type: sting
+                  Discord:
+                    type: string
+              InvalidData:
+                type: object
+              MissingData:
+                type: object
+          Code_401:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Well...at least you tried (User tried to include the Profile ID and AccountId )
+          Code_403:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Registration has not started OR You are XYZ seconds late :<
+      home:
+        root:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: string
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              Data:
+                type: object
+                properties:
+                  Applied:
+                    type: boolean
+                  Profile:
+                    type: boolean
+                  PassedTest:
+                    type: boolean
+                  GitHub:
+                    type: boolean
+        apply:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: string
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                example: success
+          Code_400:
+            type: object
+            properties:
+              token:
+                type: string
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                example: not enough arguments
+        complete_test:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: string
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                example: succes!
+          Code_400:
+            type: object
+            properties:
+              token:
+                type: string
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                example: CompletedTest is false or null
+        upload:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: string
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                example: Uploaded!
+          Code_400:
+            type: object
+            properties:
+              token:
+                type: string
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                example: Not accepted
+        update_payment:
+          Code_200:
+            type: object
+            properties:
+              token:
+                type: string
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                example: success!
+          Code_400:
+            type: object
+            properties:
+              token:
+                type: string
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+              message:
+                type: string
+                message: Missing PaymentData OR Not enough data OR Not accepted

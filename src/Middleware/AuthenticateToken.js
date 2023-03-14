@@ -1,30 +1,40 @@
-const { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } = require("./../config");
+const { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET, EMAIL_TOKEN_SECRET, TEMP_ACCESS_SECRET} = require("./../config");
+const { FindRefreshToken } = require("./../Modules/Tokens");
 const jwt = require("jsonwebtoken");
 
 function AuthenticateAccessToken(req, res, next){
-	let token = req.headers["authorization"] && req.headers["authorization"].split(" ")[1];
+	let token = req.headers.authorization;
 	if (!token){
 		return res.status(498).json({message: "Missing token"});
 	}
+	token = token.replace("Bearer ", "");
 	jwt.verify(token, ACCESS_TOKEN_SECRET, (err, decoded) => {
 		if (err){
+			if (err.name === "TokenExpiredError"){
+				return res.status(403).json({message: "Token Expired"});
+			}
 			return res.status(403).json({message: "Invalid token!"});
 		}
 		req.userid = decoded.UserId;
+		req.role = decoded.Role;
 		next();
 	});
 }
 
-function AuthenticateRefreshToken(req, res, next){
-	let token = req.headers["authorization"] && req.headers["authorization"].split(" ")[1];
+async function AuthenticateRefreshToken(req, res, next){
+	let token = req.headers.authorization;
 	if (!token){
 		return res.status(498).json({message: "Missing token"});
 	}
+	token = token.replace("Bearer ", "");
 	jwt.verify(token, REFRESH_TOKEN_SECRET, (err, decoded) => {
 		if (err){
-			return res.status(403).json({message: "Invalid token, contact support if issue persists"});
+			if (err.name === "TokenExpiredError"){
+				return res.status(403).json({message: "Token Expired"});
+			}
+			return res.status(403).json({message: "Invalid token!"});
 		}
-		console.log(decoded);
+		let TokenId = decoded._id;
 		req.refresh_token = token;
 		req.UserId = decoded.UserId;
 		req.refresh_token_id = decoded._id;
@@ -32,7 +42,26 @@ function AuthenticateRefreshToken(req, res, next){
 	});
 }
 
+function AuthenticateTempAccessToken(req, res, next){
+	let token = req.headers.authorization;
+	if (!token){
+		return res.status(498).json({message: "Missing token"});
+	}
+	token = token.replace("Bearer ", "");
+	jwt.verify(token, TEMP_ACCESS_SECRET, (err, decoded) => {
+		if (err){
+			if (err.name === "TokenExpiredError"){
+				return res.status(403).json({message: "Token Expired"});
+			}
+			return res.status(403).json({message: "Invalid token!"});
+		}
+		req.email = decoded.Email;
+		next();
+	});
+}
+
 module.exports = {
 	AuthenticateAccessToken: AuthenticateAccessToken,
 	AuthenticateRefreshToken: AuthenticateRefreshToken,
+	AuthenticateTempAccessToken: AuthenticateTempAccessToken,
 };

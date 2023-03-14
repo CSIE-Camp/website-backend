@@ -8,32 +8,34 @@ generator client {
 }
 
 model CampStatus {
-  id             Int       @id @default(1)
-  Apply_Deadline DateTime?
-}
-
-model Tokens {
-  Token     String   @id
-  AccountId String   @unique
-  CreatedAt DateTime @default(now())
-}
-
-model PendingAccounts {
-  id        String   @id @default(cuid())
-  CreatedAt DateTime @default(now())
-  Email     String   @unique
-  Password  String
+  id                       Int     @id @default(1)
+  Apply_Deadline_TimeStampv String?
+  Allow_Registration       Boolean @default(false)
+  Allow_Status_Lookup      Boolean @default(false)
+  LastEditedBy             String?
 }
 
 model Accounts {
-  id             String           @id @default(cuid())
-  CreatedAt      DateTime
-  VerifiedAt     DateTime         @default(now())
-  Email          String           @unique
+  id             String            @id @default(cuid())
+  CreatedAt      DateTime          @default(now())
+  Email          String            @unique
   Password       String
-  Role           Roles            @default(USER)
+  PassedTest     Boolean           @default(false)
+  Applied        Boolean           @default(false)
+  Status         ApplicationStatus @default(NOT_STARTED)
+  Role           Roles             @default(PARTICIPANT)
+  Points         Int               @default(0)
+  Profile        Profiles[]
+  RefreshTokens  RefreshTokens[]
   PaymentDetails PaymentDetails[]
-  Logs           Logs[]
+}
+
+model RefreshTokens {
+  id        String    @id @unique
+  Token     String
+  CreatedAt String
+  Accounts  Accounts? @relation(fields: [AccountId], references: [id])
+  AccountId String?
 }
 
 //Accounts and Profile should have a 1-1 relationship
@@ -42,43 +44,69 @@ model Profiles {
   Name                          String?
   Gender                        String?
   School                        String?
-  DOB                           DateTime?
-  Validated_ID                  String?
-  Unvalidate_ID                 String?
-  Number                        String?
-  Facebook                      String?
-  Diet                          String?
+  BirthDate                     String?
+  ID_Document                   String?
+  ID_Validated                  Boolean   @default(false)
+  PhoneNumber                   String?
+  FoodType                      String?
+  AllergySource                 String?
   Diseases                      String?
-  COVID_14Days                  Boolean @default(false)
+  ClothesSize                   String?
+  SelfIntro                     String?
+  Motivation                    String?
+  PicturePath                   String?
+  ConsentFormPath               String?
+  Lang_Learned                  String?
+  Lang_Mastered                 String?
   Emergency_ContactName         String?
   Emergency_ContactNumber       String?
   Emergency_ContactRelationship String?
   Emergency_BloodType           String?
+  Facebook                      String?
   Github                        String?
   Discord                       String?
   AccountId                     String    @unique
+  Accounts                      Accounts? @relation(fields: [AccountId], references: [id])
 }
 
 model PaymentDetails {
-  id                  Int       @id @default(autoincrement())
-  TransferDate        DateTime
-  AccountName         String
-  Account_Last5Digits String
-  Account             Accounts? @relation(fields: [AccountId], references: [id])
-  AccountId           String?
+  id                  Int           @id @default(autoincrement())
+  TransferDate        DateTime?
+  AccountName         String?
+  Account_Last5Digits String?
+  PaymentConfirmed    PaymentStatus @default(UNPAID)
+  LastEditedBy        String?
+  Account             Accounts?     @relation(fields: [AccountId], references: [id])
+  AccountId           String?       @unique
 }
 
 model Logs {
-  id         Int       @id @default(autoincrement())
-  ActionType String
-  Accounts   Accounts? @relation(fields: [AccountId], references: [id])
-  AccountId  String?
-  Details    String
-  TimeStamp  DateTime  @default(now())
+  id          Int      @id @default(autoincrement())
+  AccountId   String
+  AccountType String
+  Details     String
+  TimeStamp   DateTime @default(now())
+}
+
+enum PaymentStatus {
+  PAID
+  REFUNDED
+  UNPAID
 }
 
 enum Roles {
   DEVELOPER
   ADMIN
-  USER
+  STAFF
+  PARTICIPANT
+}
+
+enum ApplicationStatus {
+  STAFF
+  ACCEPTED
+  WAITLIST_ACCEPTED
+  WAITLIST
+  REJECTED
+  GAVE_UP
+  NOT_STARTED
 }

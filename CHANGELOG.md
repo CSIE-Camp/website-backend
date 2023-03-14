@@ -220,3 +220,68 @@
  
  **Added**
  - ESLint
+
+### 2023-02-25 05:51 (Maxx) ###
+ **Added**
+ - [New Email Service](https://hermes.csie.cool) (Thanks to [@Alphabeee](https://github.com/Alphabeee) and [@JacobLinCool](https://github.com/JacobLinCool))
+ - RevokeAllRefreshToken in Tokens.js
+ - GetAccountId in Database.js
+
+ **Changed**
+ - Rewrote bits of the API Document
+ - Signup now splits into /signup/email and /signup/password
+ - Database schema
+
+ **Removed**
+ - Old deprecated Accounts.js
+ - Unused functions in Signup
+
+### 2023-02-27 23:10 (Maxx) ###
+ **Added**
+ - Added /admin
+ - Added a Log() function in Database, some actions will be logged in the database (I'm not sure if this is a good idea ngl)
+ - Added Account Roles to the AccessTokens
+ - Added DEV_MODE to config.js
+ - Added APIs to admin
+ - Resturctured DB schema (again)
+ 
+ **Changed**
+ - Basically rewrote everything related to refresh tokens (Twice because I'm an idiot + bug fix :3 )
+
+
+ **Removed**
+ 
+
+ ### 2023-02-28 09:30 (Maxx) ###
+ **Added**
+ - /home
+ - new API endpoints
+ - Most request bodies will now return a new access token IF the user's roles are changed
+ 
+ **Removed**
+ - Health
+ - Liver
+ - Will to live 
+
+  ### 2023-02-28 18:13 (Maxx) ###
+ **Changed**
+ - Made role validation its own function
+ - Added fbLink to "Flag" if fbLink is invalid in /profile
+ - Added MissingData field to /profile/update
+ - All Response Body should have a new token field which contains token_type and access_token (if role has changed)
+
+   ### 2023-02-28 22:12 (Maxx) ###
+ **Changed**
+ - Reformatted spec.yaml (still have a few to go, only finished /signup and /login)
+ **Planned**
+ - Remake data stored in AccessToken 
+
+
+   ### 2023-03-02 21:36 (Maxx) ###
+ **Changed**
+ - Removed planned update (AccessToken cannot be invalidated)
+ - All refresh tokens will be invalidated upon password change
+ 
+   ### 2023-03-03 14:00 (Maxx) ###
+ **Added**
+ - Latest API document

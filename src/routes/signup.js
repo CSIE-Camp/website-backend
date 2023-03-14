@@ -1,60 +1,60 @@
+const {HERMES_MAIL_TOKEN, SALTROUNDS} = require("./../config");
+
 const express = require("express");
 const bcrypt = require("bcrypt");
 
+const { AuthenticateTempAccessToken } = require("./../Middleware/AuthenticateToken");
 const { IsValidEmail, IsValidString, IsValidPassword } = require("../Modules/Validate");
-const { CreatePendingAccount, FindAccountByEmail, FindPendingAccountByEmail } = require("../Modules/Database");
+const { CreatePendingAccount, FindAccountByEmail, FindPendingAccountByEmail, CreateAccount } = require("../Modules/Database");
 const { timingSafeEqual } = require("crypto");
 
 const { SendVerifyEmail } = require("./../Services/EmailService");
+const AuthenticateToken = require("./../Middleware/AuthenticateToken");
 
 const router = express.Router();
-
-const SaltRounds = 14;
-
-async function Signup(email, password, conf_password, ip) {
-	if (!(IsValidString(email) && IsValidString(password) && IsValidString(conf_password))) {
-		return { status: 400, data: "Email or password or confirm passowrd cannot be null or empty!" };
-	}
-	if (!IsValidEmail(email)) {
-		return { status: 400, data: "Invalid email!" };
-	}
-	if ((password.length !== conf_password.length) || !(IsValidPassword(password) && IsValidPassword(conf_password))) {
-		return { status: 418, data: "Sus...I think you're a teapot!" };
-	}
-	if (!timingSafeEqual(Buffer.from(password), Buffer.from(conf_password))) {
-		return { status: 400, data: "Password and Confirm password mismatch!" };
-	}
-	if (await FindAccountByEmail(email) || await FindPendingAccountByEmail(email)) {
-		return { status: 400, data: "Given email has been registered to an account. Sign in instead!" };
-	}
-	try {
-		let hashed = await bcrypt.hash(password, SaltRounds);
-		let PendingAccount = await CreatePendingAccount(email, hashed);
-		if (!PendingAccount) {
-			return { status: 500, data: "Internal Server Error" };
-		}
-		let VerifyMailStatus = await SendVerifyEmail(email, PendingAccount.id); // Unfinished
-		if (!VerifyMailStatus) {
-			return { status: 500, data: "Internal server error! Please contact our staff." };
-		}
-		return { status: 200, data: "Please verify your account!" };
-	} catch (error) {
-		console.log(error);
-		return { status: 500, data: "Unexpected error occured! Please try again later" };
-	}
-}
-
-router.post("/", async (req, res) => {
+router.post("/email", async (req, res) => {
 	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 	let email = req.body.email;
+	if (!(email && IsValidString(email))){
+		return res.status(400).json({message: "Invalid email"});
+	}
+	if (!IsValidEmail(email)){
+		return res.status(400).json({message: "Invalid email"});
+	}
+	if (await FindAccountByEmail(email)){
+		return res.status(403).json({message: "Email has been registered to an account, sign in instead!"});
+	}
+	let MailStatus = await SendVerifyEmail(email);
+	if (!MailStatus){
+		return res.status(500).json({message: "Internal server error"});
+	}
+	return res.status(200).json({message: "Please verify your email"});
+});
+
+router.post("/password", AuthenticateTempAccessToken, async (req, res) => {
+	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+	let email = req.email;
 	let password = req.body.password;
-	let conf_password = req.body.conf_password;
-	Signup(email, password, conf_password, ip).then(({ status, data }) => {
-		return res.status(status).json({ message: data });
-	}).catch((error) => {
-		console.log(error);
-		return res.status(500).json({ message: "Internal Server Error!" });
-	});
+	if (!(password && IsValidString(password))){
+		return res.status(400).json({message: "Password not provided"});
+	}
+	if (!IsValidPassword(password)){
+		return res.status(418).json({message: "Are you a teapot?"});
+	}
+	if (await FindAccountByEmail(email)){
+		return res.status(403).json({message: "Email has been registered to an account, sign in instead!"});
+	}
+	try {
+		let hashed = await bcrypt.hash(password, SALTROUNDS);
+		let status = CreateAccount(email, hashed);
+		if (status){
+			return res.status(200).json({message: "Account created!"});
+		}
+		return res.status(500),json({message: "Internal Server Error"});
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({message: "Unexpected error occured! Please try again later!"});
+	}
 });
 
 module.exports = router;
