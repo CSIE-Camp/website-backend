@@ -285,3 +285,8 @@
    ### 2023-03-03 14:00 (Maxx) ###
  **Added**
  - Latest API document
+
+  ### 2023-03-14 23:05 (Maxx) ###
+  **Changed**
+  - Removed src/api 
+  - Removed weird lines of code that are duplicated from conflict resolver (Why does this even happen...?)

@@ -1,4 +1,3 @@
-const { TimeSeriesBucketTimestamp } = require("redis");
 const { HERMES_MAIL_TOKEN } = require("../config");
 const { GenerateEmailToken, GeneratePasswordResetToken} = require("./../Modules/Tokens");
 

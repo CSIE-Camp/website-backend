@@ -6,7 +6,6 @@ const bcrypt = require("bcrypt");
 const { AuthenticateTempAccessToken } = require("./../Middleware/AuthenticateToken");
 const { IsValidEmail, IsValidString, IsValidPassword } = require("../Modules/Validate");
 const { CreatePendingAccount, FindAccountByEmail, FindPendingAccountByEmail, CreateAccount } = require("../Modules/Database");
-const { timingSafeEqual } = require("crypto");
 
 const { SendVerifyEmail } = require("./../Services/EmailService");
 const AuthenticateToken = require("./../Middleware/AuthenticateToken");
