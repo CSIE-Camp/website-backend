@@ -9,9 +9,12 @@
 
 ### Setup
 
-1. Clone this repository `git clone https://github.com/CSIE-Camp/website-backend.git`
-2. Change directory to the cloned repository (e.g. `cd website-backend`)
-3. Install dependencies `npm install`
+1. [Download Docker](https://www.docker.com)
+2. Download the [Docker Extension on VSCode](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker) or the equivalent on your favourite text editor
+3. Clone this repository `git clone https://github.com/CSIE-Camp/website-backend.git`
+4. Change directory to the cloned repository (e.g. `cd website-backend`)
+5. Install dependencies `npm install`
+6. Run the command `docker compose up`
 
 ### Run the development server
 
@@ -29,4 +32,4 @@ After the server is started, you can access the server at `http://localhost:8080
 - We will not be the safest thing on the internet but let's at least be safer than 阿莫's order form. 🤧
 - Please remember to serialize all inputs provided by the user.
 - Please remember to include the token into the Auth header (eg: bearer \<token>)
-- [This should be invisible on github...right?](https://www.youtube.com/watch?v=fujCdB93fpw&t=0s) 
+- [SECRET](https://www.youtube.com/watch?v=fujCdB93fpw&t=0s) 

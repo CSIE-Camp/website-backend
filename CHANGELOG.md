@@ -294,3 +294,7 @@
   **Added**
   - Dockerfile and docker-compose.yml
   - Sample .env under /sample
+
+  ### 2023-03-16 10:53 (Maxx) ###
+  **Changed**
+  - Changes in README
