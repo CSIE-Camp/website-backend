@@ -15,7 +15,7 @@ async function CheckRedisConnection(){
 	}
 }
 async function GenerateAccessToken(userid, Role,  ip) {
-	let token = jwt.sign(
+	const token = jwt.sign(
 		{
 			UserId: userid,
 			CreatedByIp: ip,
@@ -33,16 +33,16 @@ async function GenerateAccessToken(userid, Role,  ip) {
 }
 
 async function CompareRoles(AccountId, CurrentRole, ip){
-	let Account = await FindAccountById(AccountId);
+	const Account = await FindAccountById(AccountId);
 	if (Account.Role === CurrentRole){
 		return;
 	}
-	let NewToken = GenerateAccessToken(AccountId, Account.Role, ip);
+	const NewToken = GenerateAccessToken(AccountId, Account.Role, ip);
 	return NewToken;
 }
 
 async function GenerateEmailToken(email) {
-	let token = jwt.sign(
+	const token = jwt.sign(
 		{
 			Email: email,
 			TimeStamp: Date.now(),
@@ -57,7 +57,7 @@ async function GenerateEmailToken(email) {
 }
 
 async function GeneratePasswordResetToken(email, userid) {
-	let token = jwt.sign(
+	const token = jwt.sign(
 		{
 			TimeStamp: Date.now(),
 			UserId: userid,
@@ -74,18 +74,18 @@ async function GeneratePasswordResetToken(email, userid) {
 
 async function GetRefreshTokens(AccountId){
 	await CheckRedisConnection();
-	let RedisTokens = await RedisClient.hGet(REDIS_REFRESH_TOKEN_FIELD, AccountId);
+	const RedisTokens = await RedisClient.hGet(REDIS_REFRESH_TOKEN_FIELD, AccountId);
 	if (RedisTokens && JSON.parse(RedisTokens).length > 0){
 		return JSON.parse(RedisTokens);
 	}
-	let StoredTokens = await GetStoredRefreshTokens(AccountId);
+	const StoredTokens = await GetStoredRefreshTokens(AccountId);
 	await RedisClient.hSet(REDIS_REFRESH_TOKEN_FIELD, AccountId, JSON.stringify(StoredTokens));
 	return StoredTokens;
 }
 
 async function FindRefreshToken(AccountId, TokenId){
-	let Tokens = await GetRefreshTokens(AccountId);
-	let Keys = Object.keys(Tokens);
+	const Tokens = await GetRefreshTokens(AccountId);
+	const Keys = Object.keys(Tokens);
 	if (Keys.indexOf(TokenId) > -1){
 		return true;
 	}
@@ -93,13 +93,13 @@ async function FindRefreshToken(AccountId, TokenId){
 }
 
 async function RevokeOldestRefreshToken(AccountId, Tokens){
-	let Keys = Object.keys(Tokens);
+	const Keys = Object.keys(Tokens);
 	let Oldest = Date.now();
 	let TokenId = null;
 	for (let i = 0; i < Keys.length; i++){
-		let Key = Keys[i];
-		let Token = Tokens[Key];
-		let CreationTime = Number(Token.CreatedAt);
+		const Key = Keys[i];
+		const Token = Tokens[Key];
+		const CreationTime = Number(Token.CreatedAt);
 		if (CreationTime < Oldest){
 			Oldest = CreationTime;
 			TokenId = Key;
@@ -118,8 +118,8 @@ async function RevokeRefreshToken(AccountId, TokenId){
 	await CheckRedisConnection();
 	let RedisTokens = RedisClient.hGet(REDIS_REFRESH_TOKEN_FIELD, AccountId);
 	RedisTokens = JSON.parse(RedisTokens);
-	let Keys = Object.keys(RedisTokens);
-	let Index = Keys.indexOf(TokenId);
+	const Keys = Object.keys(RedisTokens);
+	const Index = Keys.indexOf(TokenId);
 	if (Index === -1){
 		return "Token not found!";
 	}
@@ -153,9 +153,9 @@ async function GenerateRefreshToken(AccountId, ip) {
 	if (Object.keys(Tokens).length == MAX_REFRESH_TOKENS){
 		Tokens = RevokeOldestRefreshToken(AccountId, Tokens);
 	}
-	let TokenId = randomUUID();
-	let TimeStamp = Date.now().toString();
-	let Token = jwt.sign(
+	const TokenId = randomUUID();
+	const TimeStamp = Date.now().toString();
+	const Token = jwt.sign(
 		{
 			_id: TokenId,
 			UserId: AccountId,
@@ -179,7 +179,7 @@ async function GenerateRefreshToken(AccountId, ip) {
 }
 
 async function GenerateTempAccessToken(Email){
-	let token = jwt.sign(
+	const token = jwt.sign(
 		{
 			Email: Email,
 			CreatedAt: Date.now(),

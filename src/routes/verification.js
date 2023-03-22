@@ -10,8 +10,8 @@ const { GenerateTempAccessToken } = require("../Modules/Tokens");
 const router = express.Router();
 
 router.get("/email/:token", async (req, res) => {
-	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-	let token = req.params.token;
+	const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+	const token = req.params.token;
 	if (!token){
 		return res.status(403).json({message: "Invalid token"});
 	}
@@ -23,7 +23,7 @@ router.get("/email/:token", async (req, res) => {
 			}
 			return res.wstatus(500).json({message: "Internal server error"});
 		}
-		let TempAccessToken = await GenerateTempAccessToken(decoded.Email);
+		const TempAccessToken = await GenerateTempAccessToken(decoded.Email);
 		return res.status(200).json({
 			message: "Successfully verified your email",
 			TempToken: TempAccessToken,

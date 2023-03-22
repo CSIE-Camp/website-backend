@@ -33,7 +33,7 @@ async function AuthenticateRefreshToken(req, res, next){
 			}
 			return res.status(403).json({message: "Invalid token!"});
 		}
-		let TokenId = decoded._id;
+		const TokenId = decoded._id;
 		req.refresh_token = token;
 		req.UserId = decoded.UserId;
 		req.refresh_token_id = decoded._id;
