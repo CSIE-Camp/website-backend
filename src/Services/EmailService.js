@@ -2,7 +2,7 @@ const { HERMES_MAIL_TOKEN } = require("../config");
 const { GenerateEmailToken, GeneratePasswordResetToken } = require("./../Modules/Tokens");
 
 async function SendMail(Receipient, Data) {
-    let res = await fetch("https://hermes.csie.cool/api/send", {
+    const res = await fetch("https://hermes.csie.cool/api/send", {
         method: "POST",
         headers: {
             Authorization: `Bearer ${HERMES_MAIL_TOKEN}`,
@@ -36,8 +36,8 @@ async function SendMail(Receipient, Data) {
 }
 
 async function SendVerifyEmail(email) {
-    let callback_url = await GenerateEmailToken(email);
-    let Data = {
+    const callback_url = await GenerateEmailToken(email);
+    const Data = {
         subject: "Email Verification",
         greeting: "你好",
         main: "請驗證你的電子郵件",
@@ -46,25 +46,25 @@ async function SendVerifyEmail(email) {
         ${callback_url}`,
         link: `驗證,${callback_url}`,
     };
-    let status = await SendMail(email, Data);
+    const status = await SendMail(email, Data);
     return status;
 }
 
 async function SendPasswordResetEmail(email, UserId, ip) {
-    let callback_url = await GeneratePasswordResetToken(email, UserId);
-    let Data = {
+    const callback_url = await GeneratePasswordResetToken(email, UserId);
+    const Data = {
         subject: "Password Reset",
         greeting: "師大資工營帳戶重設密碼",
         main: "forget password",
         body: `You have requested a password change at ${ip}, please ignore if IP address does not match up with yours`,
         link: `Reset Password,${callback_url}`,
     };
-    let Status = await SendMail(email, Data);
+    const Status = await SendMail(email, Data);
     return Status;
 }
 
 async function SendLoginNotifEmail(email, ip) {
-    let Data = {
+    const Data = {
         subject: "Login detected!",
         greeting: "Log in detected on a new device",
         main: "We have detected a log in on a new device",

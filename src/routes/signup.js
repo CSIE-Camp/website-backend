@@ -12,8 +12,8 @@ const AuthenticateToken = require("./../Middleware/AuthenticateToken");
 
 const router = express.Router();
 router.post("/email", async (req, res) => {
-	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-	let email = req.body.email;
+	const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+	const email = req.body.email;
 	if (!(email && IsValidString(email))){
 		return res.status(400).json({message: "Invalid email"});
 	}
@@ -23,7 +23,7 @@ router.post("/email", async (req, res) => {
 	if (await FindAccountByEmail(email)){
 		return res.status(403).json({message: "Email has been registered to an account, sign in instead!"});
 	}
-	let MailStatus = await SendVerifyEmail(email);
+	const MailStatus = await SendVerifyEmail(email);
 	if (!MailStatus){
 		return res.status(500).json({message: "Internal server error"});
 	}
@@ -31,9 +31,9 @@ router.post("/email", async (req, res) => {
 });
 
 router.post("/password", AuthenticateTempAccessToken, async (req, res) => {
-	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-	let email = req.email;
-	let password = req.body.password;
+	const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+	const email = req.email;
+	const password = req.body.password;
 	if (!(password && IsValidString(password))){
 		return res.status(400).json({message: "Password not provided"});
 	}
@@ -44,8 +44,8 @@ router.post("/password", AuthenticateTempAccessToken, async (req, res) => {
 		return res.status(403).json({message: "Email has been registered to an account, sign in instead!"});
 	}
 	try {
-		let hashed = await bcrypt.hash(password, SALTROUNDS);
-		let status = CreateAccount(email, hashed);
+		const hashed = await bcrypt.hash(password, SALTROUNDS);
+		const status = CreateAccount(email, hashed);
 		if (status){
 			return res.status(200).json({message: "Account created!"});
 		}

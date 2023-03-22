@@ -15,7 +15,7 @@ const storage = multer.diskStorage({
 		cb(null, path.join(__dirname, "..", "Uploads", "ConsentForms"));
 	},
 	filename: (req, file, cb) => {
-		let img = crypto.randomBytes(16).toString("hex") + path.extname(file.originalname);
+		const img = crypto.randomBytes(16).toString("hex") + path.extname(file.originalname);
 		req.formpath = `${path.join(__dirname, "..", "Uploads", "ConsentForms")}/${img}`;
 		cb(null, img);
 	},
@@ -36,11 +36,11 @@ const upload = multer({
 });
 
 router.get("/", AuthenticateAccessToken, async (req, res) => {
-	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-	let AccountId = req.userid;
-	let AccountRole = req.role;
-    let NewToken = await CompareRoles(AccountId, AccountRole, ip);
-    let ReturnData = {};
+	const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+	const AccountId = req.userid;
+	const AccountRole = req.role;
+    const NewToken = await CompareRoles(AccountId, AccountRole, ip);
+    const ReturnData = {};
 	if (NewToken){
         ReturnData.tokens.access_token = NewToken;
         ReturnData.tokens.token_type = "Bearer";
@@ -50,12 +50,12 @@ router.get("/", AuthenticateAccessToken, async (req, res) => {
 });
 
 router.post("/apply", AuthenticateAccessToken, async (req, res) => {
-	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-	let AccountId = req.userid;
-	let AccountRole = req.role;
-    let NewToken = await CompareRoles(AccountId, AccountRole, ip);
-    let ReturnData = {};
-	let Apply = res.body.apply;
+	const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+	const AccountId = req.userid;
+	const AccountRole = req.role;
+    const NewToken = await CompareRoles(AccountId, AccountRole, ip);
+    const ReturnData = {};
+	const Apply = res.body.apply;
     if (NewToken){
         ReturnData.tokens.access_token = NewToken;
         ReturnData.tokens.token_type = "Bearer";
@@ -78,13 +78,13 @@ function RemoveFile(PathName){
 }
 
 router.post("/complete-test", AuthenticateAccessToken, async (req, res) => {
-	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-	let AccountId = req.userid;
-	let AccountRole = req.role;
-	let CompletedTest = req.body.CompletedTest || false;
+	const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+	const AccountId = req.userid;
+	const AccountRole = req.role;
+	const CompletedTest = req.body.CompletedTest || false;
 	
-	let NewToken = await CompareRoles(AccountId, AccountRole, ip);
-    let ReturnData = {};
+	const NewToken = await CompareRoles(AccountId, AccountRole, ip);
+    const ReturnData = {};
     if (NewToken){
         ReturnData.tokens.access_token = NewToken;
         ReturnData.tokens.token_type = "Bearer";
@@ -99,17 +99,17 @@ router.post("/complete-test", AuthenticateAccessToken, async (req, res) => {
 });
 
 router.post("/upload", AuthenticateAccessToken, upload.single("ConsentForm"), async (req, res) => {
-	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-	let AccountId = req.userid;
-	let AccountRole = req.role;
-	let FilePath = req.formpath;
-    let NewToken = await CompareRoles(AccountId, AccountRole, ip);
-    let ReturnData = {};
+	const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+	const AccountId = req.userid;
+	const AccountRole = req.role;
+	const FilePath = req.formpath;
+    const NewToken = await CompareRoles(AccountId, AccountRole, ip);
+    const ReturnData = {};
     if (NewToken){
         ReturnData.tokens.access_token = NewToken;
         ReturnData.tokens.token_type = "Bearer";
     }
-	let Account = await FindAccountById(AccountId);
+	const Account = await FindAccountById(AccountId);
 	if (Account.Status !== "ACCEPTED" || Account.Status !== "WAITLIST_ACCEPTED"){
 		RemoveFile(formpath);
 		ReturnData.message = "Not accepted";
@@ -121,12 +121,12 @@ router.post("/upload", AuthenticateAccessToken, upload.single("ConsentForm"), as
 });
 
 router.post("/update-payment", AuthenticateAccessToken, async (req, res) => {
-	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-	let AccountId = req.userid;
-	let AccountRole = req.role;
-	let PaymentData = req.body.PaymentData || null;
-    let NewToken = await CompareRoles(AccountId, AccountRole, ip);
-    let ReturnData = {};
+	const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+	const AccountId = req.userid;
+	const AccountRole = req.role;
+	const PaymentData = req.body.PaymentData || null;
+    const NewToken = await CompareRoles(AccountId, AccountRole, ip);
+    const ReturnData = {};
     if (NewToken){
         ReturnData.tokens.access_token = NewToken;
         ReturnData.tokens.token_type = "Bearer";
@@ -136,7 +136,7 @@ router.post("/update-payment", AuthenticateAccessToken, async (req, res) => {
 		return res.status(400).json(ReturnData);
 	}
 	const Required = ["TransferDate", "AccountName", "Account_Last5Digits"];
-	let Keys = Object.keys(PaymentData);
+	const Keys = Object.keys(PaymentData);
 	if (Keys.length < Required.length){
 		ReturnData.message = "Not enough data";
 		return res.status(400).json(ReturnData);
@@ -152,7 +152,7 @@ router.post("/update-payment", AuthenticateAccessToken, async (req, res) => {
 		ReturnData.message = "Missing PaymentData";
 		return res.status(400).json(ReturnData);
 	}
-	let Status = await UpdatePaymentData(AccountId, PaymentData);
+	const Status = await UpdatePaymentData(AccountId, PaymentData);
 	ReturnData.message = Status ? "success" : "Not accepted!";
 	return res.status(Status ? 200 : 400).json(ReturnData);
 });

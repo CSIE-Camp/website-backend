@@ -15,7 +15,7 @@ const storage = multer.diskStorage({
 		cb(null, path.join(__dirname, "..", "Uploads", "Images"));
 	},
 	filename: (req, file, cb) => {
-		let img = crypto.randomBytes(16).toString("hex") + path.extname(file.originalname);
+		const img = crypto.randomBytes(16).toString("hex") + path.extname(file.originalname);
 		req.imagepath = `${path.join(__dirname, "..", "Uploads", "Images")}/${img}`;
 		cb(null, img);
 	},
@@ -39,11 +39,11 @@ const upload = multer({
 });
 
 router.get("/", AuthenticateAccessToken, async (req, res) => {
-	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-	let AccountId = req.userid;
-	let Profile = await FindProfile(AccountId);
-	let NewToken = await CompareRoles(AccountId, AccountRole, ip);
-    let ReturnData = {};
+	const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+	const AccountId = req.userid;
+	const Profile = await FindProfile(AccountId);
+	const NewToken = await CompareRoles(AccountId, AccountRole, ip);
+    const ReturnData = {};
     if (NewToken){
 		ReturnData.tokens = {};
         ReturnData.tokens.access_token = NewToken;
@@ -63,21 +63,21 @@ async function RemoveImage(Path){
 }
 
 router.post("/update", AuthenticateAccessToken, upload.single("selfPicture"), async (req, res) => {
-	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-	let Profile = req.body;
+	const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+	const Profile = req.body;
 	Profile.ImagePath = req.imagepath;
-	let AccountId = req.userid;
-	let AccountRole = req.role;
-	let ReturnData = {};
-	let Flags = {};
-	let CampStatus = await GetCampStatus();
+	const AccountId = req.userid;
+	const AccountRole = req.role;
+	const ReturnData = {};
+	const Flags = {};
+	const CampStatus = await GetCampStatus();
 
 	if (!CampStatus.Allow_Registration){
 		RemoveImage(Profile.ImagePath);
 		return res.status(403).json({message: "Registration has not started"});
 	}
-	let CurrentTimeStamp = (Date.now() / 1000).toFixed(0);
-	let DeadlineTimeStamp = Number(CampStatus.Apply_Deadline_TimeStamp);
+	const CurrentTimeStamp = (Date.now() / 1000).toFixed(0);
+	const DeadlineTimeStamp = Number(CampStatus.Apply_Deadline_TimeStamp);
 	console.log(CurrentTimeStamp > DeadlineTimeStamp);
 	if (CurrentTimeStamp > DeadlineTimeStamp){
 		RemoveImage(Profile.ImagePath);
@@ -90,7 +90,7 @@ router.post("/update", AuthenticateAccessToken, upload.single("selfPicture"), as
 		return res.status(401).json({ message: "Well...at least you tried" });
 	}
 	if (Profile.personalId){
-		let DocType = ValidateDocuments(Profile.personalId);
+		const DocType = ValidateDocuments(Profile.personalId);
 		Profile.personalId = DocType;
 		if (DocType.split("|")[0] === "Unknown"){
 			Flags.personalId = "無效的台灣身份證明文件";
@@ -107,7 +107,7 @@ router.post("/update", AuthenticateAccessToken, upload.single("selfPicture"), as
 		}
 	}
 	if (Profile.bloodType){
-		let BloodType = IsValidBloodType(Profile.bloodType);
+		const BloodType = IsValidBloodType(Profile.bloodType);
 		if (!BloodType){
 			delete(Profile.bloodType);
 			Flags.bloodType = "無效的血型";
@@ -146,7 +146,7 @@ router.post("/update", AuthenticateAccessToken, upload.single("selfPicture"), as
 		}
 	}
 	if (Profile.clothesSize){
-		let Size = Number(Profile.clothesSize);
+		const Size = Number(Profile.clothesSize);
 		if (Size < 1 || Size > 5){
 			delete(Profile.clothesSize);
 			Flags.clothesSize = "沒有此選項";
@@ -155,13 +155,13 @@ router.post("/update", AuthenticateAccessToken, upload.single("selfPicture"), as
 			Profile.clothesSize = AvailableSizes[Size - 1];
 		}
 	}
-	let NewToken = await CompareRoles(AccountId, AccountRole, ip);
+	const NewToken = await CompareRoles(AccountId, AccountRole, ip);
     if (NewToken){
 		ReturnData.tokens = {};
         ReturnData.tokens.access_token = NewToken;
         ReturnData.tokens.token_type = "Bearer";
     }
-	let {Status, MissingFields} = await UpdateProfile(AccountId, Profile);
+	const {Status, MissingFields} = await UpdateProfile(AccountId, Profile);
 	ReturnData.StoredData = Status;
 	ReturnData.InvalidData = Flags;
 	ReturnData.MissingData = MissingFields;

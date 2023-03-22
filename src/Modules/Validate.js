@@ -56,7 +56,7 @@ function ValidateDocuments(Document) {
 	if (ValidateID(Document)) {
 		return `Taiwanese_Id|${Document}`;
 	}
-	let ARCType = ValidateARC(Document);
+	const ARCType = ValidateARC(Document);
 	if (ARCType) {
 		return `${ARCType}|${Document}`;
 	}
@@ -94,7 +94,7 @@ function IsValidFacebookUrl(url) {
 
 const ValidBloodTypes = ["O", "A", "B", "AB", "Unknown"];
 function IsValidBloodType(BloodType){
-	let Index = Number(BloodType);
+	const Index = Number(BloodType);
 	if (!Index){
 		console.log("No index");
 		return null;
@@ -112,7 +112,7 @@ const LevelLUT = {
 	PARTICIPANT: 0,
 };
 function ValidateRoles(Role, RequiredLevel){
-    let LookupLevel = LevelLUT[Role];
+    const LookupLevel = LevelLUT[Role];
     if (!(LookupLevel && LookupLevel >= RequiredLevel)){
         return false;
     }

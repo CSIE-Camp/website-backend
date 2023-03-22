@@ -30,7 +30,7 @@ app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 //404 error
 app.get("*", (req, res) => {
-    let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
+    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
     console.log(ip)
     return res.status(404).send("URL not found!")
 })

@@ -15,9 +15,9 @@ const router = express.Router();
 
 //login
 router.post("/", async (req, res) => {
-	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-	let email = req.body.email;
-	let password = req.body.password;
+	const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+	const email = req.body.email;
+	const password = req.body.password;
 	if (!(IsValidString(email) && IsValidString(password))) {
 		return res.status(400).json({ message: "email or password cannot be null or empty!" });
 	}
@@ -31,14 +31,14 @@ router.post("/", async (req, res) => {
 		return res.status(401).json({ message: "Account does not exist!" });
 	}
 	try {
-		let Account = await FindAccountByEmail(email);
-		let AccountId = Account.id;
+		const Account = await FindAccountByEmail(email);
+		const AccountId = Account.id;
 		if (!await bcrypt.compare(password, Account.Password)) {
 			return res.status(403),json({ message: "Invalid email or password!" });
 		}
-		let RefreshToken = await GenerateRefreshToken(AccountId, ip);
-		let AccessToken = await GenerateAccessToken(AccountId, Account.Role, ip);
-		let ReturnData = {
+		const RefreshToken = await GenerateRefreshToken(AccountId, ip);
+		const AccessToken = await GenerateAccessToken(AccountId, Account.Role, ip);
+		const ReturnData = {
 			token: {},
 			Account: {},
 		};
@@ -57,9 +57,9 @@ router.post("/", async (req, res) => {
 
 //refresh access token
 router.post("/refresh", AuthenticateRefreshToken, async (req, res) => {
-	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-	let AccountId = req.UserId;
-	let RefreshTokenId = req.refresh_token_id;
+	const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+	const AccountId = req.UserId;
+	const RefreshTokenId = req.refresh_token_id;
 	if (!await FindRefreshToken(AccountId, RefreshTokenId)){
 		return res.status(401).json({message:"Token does not exist"});
 	}
@@ -73,13 +73,13 @@ router.post("/refresh", AuthenticateRefreshToken, async (req, res) => {
 });
 //send email for forget password
 router.post("/password/reset", async (req, res) => {
-	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-	let email = req.body.email;
-	let AccountExists = await FindAccountByEmail(email);
+	const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+	const email = req.body.email;
+	const AccountExists = await FindAccountByEmail(email);
 	if (!AccountExists) {
 		return res.status(401).json({ message: "Account not found" });
 	}
-	let ResetMaiLStatus = await SendPasswordResetEmail(email, AccountExists.id, ip);
+	const ResetMaiLStatus = await SendPasswordResetEmail(email, AccountExists.id, ip);
 	if (!ResetMaiLStatus) {
 		return res.status(500).json({ message: "Internal Server Error! Please contact support if issue persists" });
 	}
@@ -88,8 +88,8 @@ router.post("/password/reset", async (req, res) => {
 
 //reset password GET (by clicking link sent to their email)
 router.get("/password/reset/:token", async (req, res) => {
-	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-	let token = req.params.token;
+	const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+	const token = req.params.token;
 	if (!token) {
 		return res.status(403).json({ message: "Missing token" });
 		return res.status(403).json({ message: "Missing token" });
@@ -102,7 +102,7 @@ router.get("/password/reset/:token", async (req, res) => {
 			return res.status(403).json({ message: "Invalid token" });
 		}
 		//reset password site?
-		let TempToken = await GenerateTempAccessToken(decoded.Email);
+		const TempToken = await GenerateTempAccessToken(decoded.Email);
 		return res.status(200).json({
 			message: "Reset password confirmed!",
 			temp_token: TempToken,
@@ -113,9 +113,9 @@ router.get("/password/reset/:token", async (req, res) => {
 
 //reset password post
 router.post("/password/update", AuthenticateTempAccessToken, async (req, res) => {
-	let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-	let email = req.email;
-	let password = req.body.password;
+	const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+	const email = req.email;
+	const password = req.body.password;
 	if (!(password && IsValidString(password))){
 		return res.status(400).json({message: "Password not provided"});
 	}
@@ -126,8 +126,8 @@ router.post("/password/update", AuthenticateTempAccessToken, async (req, res) =>
 		return res.status(400).json({message: "Invalid email"});
 	}
 	try {
-		let hashed = await bcrypt.hash(password, SALTROUNDS);
-		let AccountId = await UpdateAccountPassword(email, hashed);
+		const hashed = await bcrypt.hash(password, SALTROUNDS);
+		const AccountId = await UpdateAccountPassword(email, hashed);
 		if (AccountId){
 			await RevokeAllRefreshTokens(AccountId);
 			return res.status(200).json({message: "Password Updated! Logged out from all devices"});
@@ -141,8 +141,8 @@ router.post("/password/update", AuthenticateTempAccessToken, async (req, res) =>
 
 //logout
 router.delete("/", AuthenticateAccessToken, async (req, res) => { //logging out
-	let UserId = req.userid;
-	let RefreshToken = req.body.refresh_token;
+	const UserId = req.userid;
+	const RefreshToken = req.body.refresh_token;
 	if (!RefreshToken){
 		return res.status(400).json({message: "Refresh token cannot be null"});
 	}
@@ -154,8 +154,8 @@ router.delete("/", AuthenticateAccessToken, async (req, res) => { //logging out
 			console.log(`Someone forged a token ${UserId}, ${decoded.UserId}, ${ip}`);
 			return res.status(401).json({message: "Invalid token"});
 		}
-		let TokenId = decoded._id;
-		let {status, message} = await RevokeRefreshToken(UserId, TokenId);
+		const TokenId = decoded._id;
+		const {status, message} = await RevokeRefreshToken(UserId, TokenId);
 		if (!status){
 			return res.status(400).json({message: message});
 		}

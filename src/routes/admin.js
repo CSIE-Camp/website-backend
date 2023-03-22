@@ -10,7 +10,7 @@ async function CheckPermissions({AccountId, CurrentRole, RequiredLevel, LogMessa
     if (ValidateRoles(CurrentRole, RequiredLevel)){
         return [true, null];
     }
-    let Account = await FindAccountById(AccountId);
+    const Account = await FindAccountById(AccountId);
     if (ValidateRoles(Account.Role, RequiredLevel)){
         return [true, Account.Role];
     }
@@ -22,12 +22,12 @@ async function CheckPermissions({AccountId, CurrentRole, RequiredLevel, LogMessa
 
 //view profile of given AccountId, STAFF+
 router.get("/view-profile/:id", AuthenticateAccessToken, async (req, res) => {
-    let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-    let AccountId = req.userid;
-    let AccountRole = req.role;
-    let TargetAccount = req.params.id;
-    let ReturnData = {};
-    let ReturnMessage = CheckPermissions({
+    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+    const AccountId = req.userid;
+    const AccountRole = req.role;
+    const TargetAccount = req.params.id;
+    const ReturnData = {};
+    const ReturnMessage = CheckPermissions({
         Accountid: AccountId, 
         CurrentRole: AccountRole, 
         RequiredLevel: 1, 
@@ -51,13 +51,13 @@ router.get("/view-profile/:id", AuthenticateAccessToken, async (req, res) => {
 
 //Changes the status of given AccountId, ADMIN / DEVELOPER only
 router.post("/confirm-status", AuthenticateAccessToken, async (req, res) => {
-    let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-    let AccountId = req.userid;
-    let AccountRole = req.role;
-    let TargetAccount = req.body.TargetAccount || "";
-    let NewStatus = req.body.NewStatus || "";
-    let ReturnData = {};
-    let ReturnMessage = CheckPermissions({
+    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+    const AccountId = req.userid;
+    const AccountRole = req.role;
+    const TargetAccount = req.body.TargetAccount || "";
+    const NewStatus = req.body.NewStatus || "";
+    const ReturnData = {};
+    const ReturnMessage = CheckPermissions({
         AccountId: AccountId, 
         CurrentRole: AccountRole, 
         RequiredLevel: 2, 
@@ -71,7 +71,7 @@ router.post("/confirm-status", AuthenticateAccessToken, async (req, res) => {
         ReturnData.token.access_token = await GenerateAccessToken(AccountId, ReturnMessage[1], ip);;
         ReturnData.token.token_type = "Bearer";
     }  
-    let Status = await ChangeApplicationStatus(AccountId, AccountRole, TargetAccount, NewStatus, ip);
+    const Status = await ChangeApplicationStatus(AccountId, AccountRole, TargetAccount, NewStatus, ip);
     if (!Status[0]){
         ReturnData.message = Status[1];
         return res.status(400).json(ReturnData);
@@ -82,12 +82,12 @@ router.post("/confirm-status", AuthenticateAccessToken, async (req, res) => {
 
 //confirm payment of given AccountId
 router.post("/confirm-payment", AuthenticateAccessToken, async (req, res) => {
-    let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-    let AccountId = req.userid;
-    let AccountRole = req.role;
-    let TargetAccount = req.body.TargetAccount || "";
-    let ReturnData = {};
-    let ReturnMessage = CheckPermissions({
+    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+    const AccountId = req.userid;
+    const AccountRole = req.role;
+    const TargetAccount = req.body.TargetAccount || "";
+    const ReturnData = {};
+    const ReturnMessage = CheckPermissions({
         AccountId: AccountId,
         CurrentRole: AccountRole,
         RequiredLevel: 2, 
@@ -106,7 +106,7 @@ router.post("/confirm-payment", AuthenticateAccessToken, async (req, res) => {
         ReturnData.message = "Not enough arguments";
         return res.status(403).json(ReturnData);
     }
-    let Status = await ConfirmPaymentStatus(AccountId, AccountRole, TargetAccount, ip);
+    const Status = await ConfirmPaymentStatus(AccountId, AccountRole, TargetAccount, ip);
     ReturnData.message = Status[1];
     if (!Status[0]){
         return res.status(400).json(ReturnData);
@@ -116,13 +116,13 @@ router.post("/confirm-payment", AuthenticateAccessToken, async (req, res) => {
 
 //Updates the role for the given AccountId
 router.post("/update-roles", AuthenticateAccessToken, async (req, res) => {
-    let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-    let AccountId = req.userid;
-    let AccountRole = req.role;
-    let TargetAccount = req.body.TargetAccount;
-    let PendingRole = req.body.NewRole;
-    let ReturnData = {};
-    let ReturnMessage = CheckPermissions({
+    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+    const AccountId = req.userid;
+    const AccountRole = req.role;
+    const TargetAccount = req.body.TargetAccount;
+    const PendingRole = req.body.NewRole;
+    const ReturnData = {};
+    const ReturnMessage = CheckPermissions({
         AccountId: AccountId,
         CurrentRole: AccountRole,
         RequiredLevel: 2,
@@ -149,19 +149,19 @@ router.post("/update-roles", AuthenticateAccessToken, async (req, res) => {
         ReturnData.message = "Invalid Roles";
         return res.status(403).json(ReturnData);
     }
-    let message = await UpdateAccountRoles(AccountId, AccountRole, TargetAccount, PendingRole);
+    const message = await UpdateAccountRoles(AccountId, AccountRole, TargetAccount, PendingRole);
     ReturnData.message = RoleData;
     return res.status(200).json(ReturnData);
 });
 
 //view logs of given ID or All
 router.get("/view-logs/:TargetAccount", AuthenticateAccessToken, async (req, res) => {
-    let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-    let AccountId = req.userid;
-    let AccountRole = req.role;
-    let TargetAccount = req.params.TargetAccount;
-    let ReturnData = {};
-    let ReturnMessage = CheckPermissions({
+    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+    const AccountId = req.userid;
+    const AccountRole = req.role;
+    const TargetAccount = req.params.TargetAccount;
+    const ReturnData = {};
+    const ReturnMessage = CheckPermissions({
         AccountId: AccountId,
         CurrentRole: AccountRole,
         RequiredLevel: 2,
@@ -179,10 +179,10 @@ router.get("/view-logs/:TargetAccount", AuthenticateAccessToken, async (req, res
 });
 
 router.get("/get-camp-status", AuthenticateAccessToken, async (req, res) => {
-    let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-    let AccountId = req.userid;
-    let ReturnData = {};
-    let ReturnMessage = CheckPermissions({
+    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+    const AccountId = req.userid;
+    const ReturnData = {};
+    const ReturnMessage = CheckPermissions({
         AccountId: AccountId,
         CurrentRole: AccountRole,
         RequiredLevel: 1,
@@ -200,12 +200,12 @@ router.get("/get-camp-status", AuthenticateAccessToken, async (req, res) => {
 });
 
 router.post("/edit-camp-status", AuthenticateAccessToken, async (req, res) => {
-    let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-    let AccountId = req.userid;
-    let AccountRole = req.role;
-    let NewStatus = req.body;
-    let ReturnData = {};
-    let ReturnMessage = CheckPermissions({
+    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+    const AccountId = req.userid;
+    const AccountRole = req.role;
+    const NewStatus = req.body;
+    const ReturnData = {};
+    const ReturnMessage = CheckPermissions({
         AccountId: AccountId,
         CurrentRole: AccountRole,
         RequiredLevel: 2,
@@ -218,10 +218,10 @@ router.post("/edit-camp-status", AuthenticateAccessToken, async (req, res) => {
         ReturnData.token.access_token = await GenerateAccessToken(AccountId, ReturnMessage[1], ip);;
         ReturnData.token.token_type = "Bearer";
     }
-    let Keys = Object.keys(NewStatus);
+    const Keys = Object.keys(NewStatus);
     const Allowed = ["Apply_Deadline_TimeStamp", "Allow_Registration", "Allow_Status_Lookup"];
     for (let i = 0; i < Keys.length; i++){
-        let Index = Allowed.indexOf(Keys[i]); 
+        const Index = Allowed.indexOf(Keys[i]); 
         if (Index === -1){
             delete(NewStatus[Keys[i]]);
             continue;
@@ -241,18 +241,18 @@ router.post("/edit-camp-status", AuthenticateAccessToken, async (req, res) => {
         }
     }
     NewStatus.LastEditedBy = AccountId;
-    let CampStatus = await UpdateCampStatus(AccountId, AccountRole, NewStatus, ip);
+    const CampStatus = await UpdateCampStatus(AccountId, AccountRole, NewStatus, ip);
     ReturnData.CampStatus = CampStatus;
     return res.status(200).json(ReturnData);
 });
 
 router.post("/search", AuthenticateAccessToken, async (req, res) => {
-    let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-    let AccountId = req.userid;
-    let AccountRole = req.role;
-    let Name = req.body.Name || "";
-    let ReturnData = {};
-    let ReturnMessage = CheckPermissions({
+    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+    const AccountId = req.userid;
+    const AccountRole = req.role;
+    const Name = req.body.Name || "";
+    const ReturnData = {};
+    const ReturnMessage = CheckPermissions({
         AccountId: AccountId,
         CurrentRole: AccountRole,
         RequiredLevel: 1,
