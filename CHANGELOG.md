@@ -298,3 +298,6 @@
   ### 2023-03-16 10:53 (Maxx) ###
   **Changed**
   - Changes in README
+
+  **Changed**
+  - DEBUG

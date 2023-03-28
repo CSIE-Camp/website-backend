@@ -2,7 +2,7 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient;
 
-async function Log(AccountId, AccountType, Details){
+async function Log(AccountId, AccountType, Details) {
 	await prisma.logs.create({
 		data: {
 			AccountId: AccountId,
@@ -13,13 +13,13 @@ async function Log(AccountId, AccountType, Details){
 	return;
 }
 
-async function CreateCampStatus(){
+async function CreateCampStatus() {
 	const Records = await prisma.campStatus.findMany();
 	const Keys = Object.keys(Records).length;
-	if (Keys == 1){
+	if (Keys == 1) {
 		return Records;
 	}
-	if (Keys > 1){
+	if (Keys > 1) {
 		await prisma.campStatus.deleteMany();
 	}
 	const NewRecord = await prisma.campStatus.create({
@@ -30,21 +30,21 @@ async function CreateCampStatus(){
 	return NewRecord;
 }
 
-async function GetCampStatus(){
+async function GetCampStatus() {
 	const Status = await prisma.campStatus.findUnique({
 		where: {
 			id: 1,
 		},
 	});
-	if (!Status){
+	if (!Status) {
 		const Status = CreateCampStatus();
-		delete(Status.id);
+		delete (Status.id);
 		return Status;
 	}
-	delete(Status.id);
+	delete (Status.id);
 	return Status;
 }
-async function UpdateCampStatus(StaffId, StaffRole, Status, ip){
+async function UpdateCampStatus(StaffId, StaffRole, Status, ip) {
 	await CreateCampStatus();
 	const CampStatus = await prisma.campStatus.update({
 		where: {
@@ -52,8 +52,8 @@ async function UpdateCampStatus(StaffId, StaffRole, Status, ip){
 		},
 		data: Status,
 	});
-	await Log(StaffId, StaffRole,`Updated camp status from [${ip}]`);
-	delete(CampStatus.id);
+	await Log(StaffId, StaffRole, `Updated camp status from [${ip}]`);
+	delete (CampStatus.id);
 	return CampStatus;
 }
 
@@ -89,7 +89,7 @@ async function UpdateAccountEmail(Email) {
 
 async function UpdateAccountPassword(Email, password) {
 	const Account = await FindAccountByEmail(Email);
-	if (!Account){
+	if (!Account) {
 		return false;
 	}
 	await prisma.accounts.update({
@@ -103,13 +103,13 @@ async function UpdateAccountPassword(Email, password) {
 	return Account.id;
 }
 
-async function GetAccountId(Email){
+async function GetAccountId(Email) {
 	const Account = await prisma.accounts.findUnique({
 		where: {
 			Email: Email,
 		},
 	});
-	if (!Account){
+	if (!Account) {
 		return null;
 	}
 	return Account.id;
@@ -132,7 +132,7 @@ async function FindAccountById(AccountId) {
 	});
 	return Account;
 }
-
+/*
 async function RemoveAccountByEmail(Email) {
 	const DeletedAccount = await prisma.accounts.delete({
 		where: {
@@ -150,7 +150,7 @@ async function RemoveAccountById(AccountId) {
 	});
 	return DeletedAccount;
 }
-
+*/
 async function GetEmergencyInfo(AccountId) {
 	const EmergencyData = await prisma.profiles.findMany({
 		where: {
@@ -173,53 +173,53 @@ async function FindProfile(id) {
 		},
 	});
 	delete (Profile.id);
-	delete(Profile.AccountId);
+	delete (Profile.AccountId);
 	return Profile;
 }
 
 const NewProfileTranslate = {
-	"Name" : "name",
-	"Gender" : "gender",
-	"School" : "school",
-	"BirthDate" : "birthDate",
-	"ID_Document" : "personalId",
-	"PhoneNumber" : "phoneNumber",
-	"Emergency_BloodType" : "bloodType",
-	"Facebook" : "fbLink",
-	"Emergency_ContactName" : "parentName",
-	"Emergency_ContactRelationship" : "relation",
-	"Emergency_ContactNumber" : "parentPhoneNumber",
-	"TravelHistory" : "travelHistory",
-	"FoodType" : "foodType",
-	"AllergySource" : "allergySource",
-	"Diseases" : "disease",
-	"ClothesSize" : "clothesSize",
-	"SelfIntro" : "selfIntro",
-	"Motivation" : "motivation",
-	"PicturePath" : "selfPicture",
-	"Lang_Leanred" : "lanlearned",
-	"Lang_Mastered" : "lanMaster",
+	"Name": "name",
+	"Gender": "gender",
+	"School": "school",
+	"BirthDate": "birthDate",
+	"ID_Document": "personalId",
+	"PhoneNumber": "phoneNumber",
+	"Emergency_BloodType": "bloodType",
+	"Facebook": "fbLink",
+	"Emergency_ContactName": "parentName",
+	"Emergency_ContactRelationship": "relation",
+	"Emergency_ContactNumber": "parentPhoneNumber",
+	"TravelHistory": "travelHistory",
+	"FoodType": "foodType",
+	"AllergySource": "allergySource",
+	"Diseases": "disease",
+	"ClothesSize": "clothesSize",
+	"SelfIntro": "selfIntro",
+	"Motivation": "motivation",
+	"PicturePath": "selfPicture",
+	"Lang_Leanred": "lanlearned",
+	"Lang_Mastered": "lanMaster",
 };
 
-async function UpdateProfile(AccountId, NewProfileData){
+async function UpdateProfile(AccountId, NewProfileData) {
 	const ExistingProfile = await FindProfile(AccountId);
 	const ExistingKeys = Object.keys(ExistingProfile);
 	const ToUpdate = {};
 	const Missing = {};
 	const PersonalId = NewProfileData["personalId"];
-	if (PersonalId){
+	if (PersonalId) {
 		ToUpdate.ID_Validated = PersonalId.split("|")[0] !== "Unknown" ? true : false;
 	}
-	
-	for (let i = 0; i < ExistingKeys.length; i++){
+
+	for (let i = 0; i < ExistingKeys.length; i++) {
 		const Key = ExistingKeys[i];
-		if (Key == "ConsentFormPath"){
+		if (Key == "ConsentFormPath") {
 			continue;
 		}
-		if (NewProfileData[NewProfileTranslate[Key]]){
+		if (NewProfileData[NewProfileTranslate[Key]]) {
 			const Existing = ExistingProfile[Key];
 			const New = NewProfileData[NewProfileTranslate[Key]];
-			if (New && Existing !== New){
+			if (New && Existing !== New) {
 				ToUpdate[Key] = New;
 			}
 
@@ -231,29 +231,29 @@ async function UpdateProfile(AccountId, NewProfileData){
 		},
 		data: ToUpdate,
 	});
-	delete(NewProfile.id);
-	delete(NewProfile.AccountId);
-	return {NewProfile, Missing};
+	delete (NewProfile.id);
+	delete (NewProfile.AccountId);
+	return { NewProfile, Missing };
 }
 
-async function GetPaymentDetails(AccountId){
+async function GetPaymentDetails(AccountId) {
 	const PaymentDetails = await prisma.paymentDetails.findUnique({
 		where: {
 			AccountId: AccountId,
 		},
 	});
-	delete(PaymentDetails.id);
-	delete(PaymentDetails.AccountId);
+	delete (PaymentDetails.id);
+	delete (PaymentDetails.AccountId);
 	return PaymentDetails;
 }
 
 
-async function UpdatePaymentData(AccountId, {TransferDate, AccountName, Account_Last5Digits}){
+async function UpdatePaymentData(AccountId, { TransferDate, AccountName, Account_Last5Digits }) {
 	const Account = await FindAccountById(AccountId);
-	if (!(Account.StatusStatus == "ACCEPTED" || Account.Status == "WAITLIST_ACCEPTED")){
+	if (!(Account.StatusStatus == "ACCEPTED" || Account.Status == "WAITLIST_ACCEPTED")) {
 		return false;
 	}
-	const PaymentData = await prisma.paymentDetails.update({
+	await prisma.paymentDetails.update({
 		where: {
 			AccountId: AccountId,
 		},
@@ -269,13 +269,13 @@ async function UpdatePaymentData(AccountId, {TransferDate, AccountName, Account_
 
 const AvailableApplicationStatus = ["STAFF", "ACCEPTED", "WAITLIST_ACCEPTED", "WAITLIST", "GAVE_UP", "NOT_STARTED"];
 
-async function ChangeApplicationStatus(StaffId, StaffRole, AccountId, Status, ip){
-	if (AvailableApplicationStatus.indexOf(Status) < 0){
+async function ChangeApplicationStatus(StaffId, StaffRole, AccountId, Status, ip) {
+	if (AvailableApplicationStatus.indexOf(Status) < 0) {
 		await Log(StaffId, StaffRole, `Attempted to give non-existent roles from [${ip}]`);
 		return [false, "Status not allowed"];
 	}
 	const Account = await FindAccountById(AccountId);
-	if (!Account){
+	if (!Account) {
 		return [false, "Account not found"];
 	}
 	await prisma.accounts.update({
@@ -286,7 +286,7 @@ async function ChangeApplicationStatus(StaffId, StaffRole, AccountId, Status, ip
 			Status: Status,
 		},
 	});
-	if (Status == "ACCEPTED" || Status == "WAITLIST_ACCEPTED"){
+	if (Status == "ACCEPTED" || Status == "WAITLIST_ACCEPTED") {
 		await prisma.paymentDetails.create({
 			data: {
 				AccountId: AccountId,
@@ -295,10 +295,10 @@ async function ChangeApplicationStatus(StaffId, StaffRole, AccountId, Status, ip
 	}
 	return [true, "success!"];
 }
-
-async function RefundParticipant(StaffId, StaffRole, AccountId, ip){
+/*
+async function RefundParticipant(StaffId, StaffRole, AccountId, ip) {
 	const Account = await FindAccountById(AccountId);
-	if (!Account.Status === "GAVE_UP"){
+	if (!Account.Status === "GAVE_UP") {
 		return [false, "Unable to confirm refund status. Participant has not given up"];
 	}
 	await prisma.paymentDetails.update({
@@ -313,17 +313,17 @@ async function RefundParticipant(StaffId, StaffRole, AccountId, ip){
 	await Log(StaffId, StaffRole, `Has changed ${AccountId} payment status to REFUNDED from [${ip}]`);
 	return [true, "Success!"];
 }
-
-async function ConfirmPaymentStatus(StaffId, StaffRole, AccountId, ip){
+*/
+async function ConfirmPaymentStatus(StaffId, StaffRole, AccountId, ip) {
 	const Account = await FindAccountById(AccountId);
-	if (!Account){
+	if (!Account) {
 		console.log(AccountId);
 		return [false, "Account not found"];
 	}
-	if (Account.Status !== "ACCEPTED" && Account.Status !== "WAITLIST_ACCEPTED"){
+	if (Account.Status !== "ACCEPTED" && Account.Status !== "WAITLIST_ACCEPTED") {
 		return [false, "Not accepted"];
 	}
-	if (Account.Status == "GAVE_UP"){
+	if (Account.Status == "GAVE_UP") {
 		return [false, "Participant has given up their slot"];
 	}
 	const PaymentDetails = await prisma.paymentDetails.findUnique({
@@ -331,12 +331,12 @@ async function ConfirmPaymentStatus(StaffId, StaffRole, AccountId, ip){
 			AccountId: AccountId,
 		},
 	});
-	
-	if (!PaymentDetails || PaymentDetails.TransferDate == null){
+
+	if (!PaymentDetails || PaymentDetails.TransferDate == null) {
 		await Log(StaffId, StaffRole, `Attempted to confirm null payment status for ${AccountId} from [${ip}]`);
 		return [false, "Account has not update payment data"];
 	}
-	if (PaymentDetails.PaymentConfirmed == "REFUNDED"){
+	if (PaymentDetails.PaymentConfirmed == "REFUNDED") {
 		return [false, "Payment has been refunded"];
 	}
 	await prisma.paymentDetails.update({
@@ -351,7 +351,7 @@ async function ConfirmPaymentStatus(StaffId, StaffRole, AccountId, ip){
 	return [true, "success"];
 }
 
-async function AdminViewProfile(TargetId, AccountId, AccountRole){
+async function AdminViewProfile(TargetId, AccountId, AccountRole) {
 	const ReturnData = {
 		Account: {},
 	};
@@ -360,8 +360,8 @@ async function AdminViewProfile(TargetId, AccountId, AccountRole){
 			id: TargetId,
 		},
 	});
-	if (!Account){
-		return {message: "Account does not exist!"};
+	if (!Account) {
+		return { message: "Account does not exist!" };
 	}
 	ReturnData.Account.Email = Account.Email;
 	ReturnData.Account.CreatedAt = Account.CreatedAt;
@@ -369,30 +369,30 @@ async function AdminViewProfile(TargetId, AccountId, AccountRole){
 	Account = null;
 	const Profile = await FindProfile(TargetId);
 	const PaymentDetails = await GetPaymentDetails(TargetId);
-	if (AccountRole != "ADMIN" && AccountRole !== "DEVELOPER"){
-		delete(Profile.ID_Document);
-		delete(PaymentDetails.AccountName);
-		delete(PaymentDetails.Account_Last5Digits);
+	if (AccountRole != "ADMIN" && AccountRole !== "DEVELOPER") {
+		delete (Profile.ID_Document);
+		delete (PaymentDetails.AccountName);
+		delete (PaymentDetails.Account_Last5Digits);
 	}
 	ReturnData.Profile = Profile;
 	ReturnData.PaymentDetails = await GetPaymentDetails(TargetId);
-	
+
 	await Log(AccountId, AccountRole, `Has queried profile data for account ${TargetId}`);
 	return ReturnData;
 }
 
-async function AdminViewAllProfile(AccountId, AccountRole){
+async function AdminViewAllProfile(AccountId, AccountRole) {
 	const ReturnData = {};
 	const Accounts = await prisma.accounts.findMany();
-	for (let i = 0; i < Accounts.length; i++){
+	for (let i = 0; i < Accounts.length; i++) {
 		const Account = Accounts[i];
 		const AccountId = Account.AccountId;
 		const Profile = await FindProfile(AccountId);
 		const PaymentDetails = await GetPaymentDetails(AccountId);
-		if (AccountRole != "ADMIN" && AccountRole !== "DEVELOPER"){
-			delete(Profile.ID_Document);
-			delete(PaymentDetails.AccountName);
-			delete(PaymentDetails.Account_Last5Digits);
+		if (AccountRole != "ADMIN" && AccountRole !== "DEVELOPER") {
+			delete (Profile.ID_Document);
+			delete (PaymentDetails.AccountName);
+			delete (PaymentDetails.Account_Last5Digits);
 		}
 		ReturnData.AccountId = {};
 		ReturnData.AccountId.Account = {
@@ -403,19 +403,19 @@ async function AdminViewAllProfile(AccountId, AccountRole){
 		};
 		ReturnData.AccountId.Profile = Profile;
 		ReturnData.AccountId.PaymentDetails = PaymentDetails;
-	};
+	}
 	await Log(AccountId, AccountRole, "User has queried for ALL profile data");
 	return ReturnData;
 }
 
-async function GetStoredRefreshTokens(AccountId){
+async function GetStoredRefreshTokens(AccountId) {
 	const Tokens = await prisma.refreshTokens.findMany({
 		where: {
 			AccountId: AccountId,
 		},
 	});
 	const ReturnData = {};
-	for (let i = 0; i < Tokens.length; i++){
+	for (let i = 0; i < Tokens.length; i++) {
 		const Token = Tokens[i];
 		ReturnData[Token.id] = {
 			Token: Token.Token,
@@ -425,7 +425,7 @@ async function GetStoredRefreshTokens(AccountId){
 	return ReturnData;
 }
 
-async function AddStoredRefreshTokens(AccountId, TokenId, Token, CreatedAt){
+async function AddStoredRefreshTokens(AccountId, TokenId, Token, CreatedAt) {
 	await prisma.refreshTokens.create({
 		data: {
 			id: TokenId,
@@ -437,7 +437,7 @@ async function AddStoredRefreshTokens(AccountId, TokenId, Token, CreatedAt){
 	return;
 }
 
-async function RevokeStoredRefreshToken(AccountId, TokenId){
+async function RevokeStoredRefreshToken(AccountId, TokenId) {
 	await prisma.refreshTokens.delete({
 		where: {
 			id: TokenId,
@@ -446,7 +446,7 @@ async function RevokeStoredRefreshToken(AccountId, TokenId){
 	return;
 }
 
-async function RevokeAllStoredRefreshTokens(AccountId){
+async function RevokeAllStoredRefreshTokens(AccountId) {
 	await prisma.refreshTokens.deleteMany({
 		where: {
 			AccountId: AccountId,
@@ -455,9 +455,9 @@ async function RevokeAllStoredRefreshTokens(AccountId){
 	return;
 }
 
-async function UpdateAccountRoles(AccountId, AccountRole, TargetAccount, NewRole){
+async function UpdateAccountRoles(AccountId, AccountRole, TargetAccount, NewRole) {
 	const Account = await FindAccountById(TargetAccount);
-	if (!Account){
+	if (!Account) {
 		return "Account not found!";
 	}
 	const OldRole = Account.Role;
@@ -473,15 +473,15 @@ async function UpdateAccountRoles(AccountId, AccountRole, TargetAccount, NewRole
 	return "Success!";
 }
 
-async function GetLogs(AccountId, AccountRole, TargetAccount, ip){
-	if (TargetAccount === "null"){
+async function GetLogs(AccountId, AccountRole, TargetAccount, ip) {
+	if (TargetAccount === "null") {
 		await Log(AccountId, AccountRole, `has accessed all logs from [${ip}]`);
 		return await prisma.logs.findMany();
 	}
 	const Account = await FindAccountById(TargetAccount);
-	if (!Account){
+	if (!Account) {
 		await Log(AccountId, AccountRole, `attempted to access logs from non-existing account from [${ip}]`);
-		return {message: "Target account not found!"};
+		return { message: "Target account not found!" };
 	}
 	await Log(AccountId, AccountRole, `accessed logs from account ${TargetAccount} from [${ip}]`);
 	const Logs = await prisma.logs.findMany({
@@ -492,7 +492,7 @@ async function GetLogs(AccountId, AccountRole, TargetAccount, ip){
 	return Logs;
 }
 
-async function GetAccountStatus(AccountId){
+async function GetAccountStatus(AccountId) {
 	const Profile = await FindProfile(AccountId);
 	const Account = await FindAccountById(AccountId);
 	const Keys = Object.keys(Profile);
@@ -502,16 +502,16 @@ async function GetAccountStatus(AccountId){
 		PassedTest: Account.PassedTest,
 		GitHub: Account.GitHub ? true : false,
 	};
-	for (let i = 0; i < Keys.length; i++){
+	for (let i = 0; i < Keys.length; i++) {
 		const Key = Keys[i];
-		if (!Profile[Key]){
+		if (!Profile[Key]) {
 			ReturnData.Profile = false;
 		}
 	}
 	return ReturnData;
 }
 
-async function ApplyToCamp(AccountId, Status){
+async function ApplyToCamp(AccountId, Status) {
 	await prisma.accounts.update({
 		where: {
 			id: AccountId,
@@ -523,7 +523,7 @@ async function ApplyToCamp(AccountId, Status){
 	return;
 }
 
-async function UploadConsentForm(AccountId, Path){
+async function UploadConsentForm(AccountId, Path) {
 	await prisma.profiles.update({
 		where: {
 			AccountId: AccountId,
@@ -535,7 +535,7 @@ async function UploadConsentForm(AccountId, Path){
 	return;
 }
 
-async function CompleteTest(AccountId){
+async function CompleteTest(AccountId) {
 	await prisma.accounts.update({
 		where: {
 			id: AccountId,
@@ -546,8 +546,8 @@ async function CompleteTest(AccountId){
 	});
 	return;
 }
-
-async function EditPoints(AccountId, Points){
+/*
+async function EditPoints(AccountId, Points) {
 	const Account = await FindAccountById(AccountId);
 	let CurrentPoints = Account.Points;
 	const NewPoints = CurrentPoints += Points;
@@ -561,27 +561,27 @@ async function EditPoints(AccountId, Points){
 	});
 	return NewRecord.Points;
 }
-
-async function FindDataByName(Name, Role){
+*/
+async function FindDataByName(Name, Role) {
 	const Records = await prisma.profiles.findMany({
 		where: {
 			Name: Name,
 		},
 	});
-	if (Object.keys(Records).length == 0){
+	if (Object.keys(Records).length == 0) {
 		return "Not found";
 	}
 	const ReturnData = {};
-	for (let i = 0; i < Object.keys(Records).length; i++){
+	for (let i = 0; i < Object.keys(Records).length; i++) {
 		const Profile = Records[i];
-		delete(Profile.id);
-		delete(Profile.AccountId);
+		delete (Profile.id);
+		delete (Profile.AccountId);
 		const Account = await FindAccountById(Profile.AccountId);
 		const PaymentData = await GetPaymentDetails(Profile.AccountId);
-		if (Role !== "ADMIN" && Role !== "DEVELOPER"){
-			delete(Profile.ID_Document);
-			delete(PaymentData.AccountName);
-			delete(PaymentData.Account_Last5Digits);
+		if (Role !== "ADMIN" && Role !== "DEVELOPER") {
+			delete (Profile.ID_Document);
+			delete (PaymentData.AccountName);
+			delete (PaymentData.Account_Last5Digits);
 		}
 		ReturnData[Profile.AccountId] = {
 			Profile: Profile,
