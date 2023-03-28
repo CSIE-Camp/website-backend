@@ -73,11 +73,6 @@ function IsValidEmail(email) {
 	return EmailRegex.test(email) && typeof email == "string";
 }
 
-
-function IsValidEmail(email) {
-	return EmailRegex.test(email) && typeof email == "string";
-}
-
 const Sha512Regex = /[0-9a-fA-F]{128}$/;
 function IsValidPassword(String) {
 	return Sha512Regex.test(String) && String.length === 128;
@@ -87,19 +82,19 @@ function IsValidString(String) {
 	return typeof String === "string" && String.split(" ").join("") != "";
 }
 
-const FacebookRegex = /(?:https?:\/\/)?(?:www\.)?(mbasic.facebook|m\.facebook|facebook|fb)\.(com|me)\/(?:(?:\w\.)*#!\/)?(?:pages\/)?(?:[\w\-\.]*\/)*([\w\-\.]*)/;
+const FacebookRegex = /(?:https?:\/\/)?(?:www\.)?(mbasic.facebook|m\.facebook|facebook|fb)\.(com|me)\/(?:(?:\w\.)*#!\/)?(?:pages\/)?(?:[\w]*\/)*([\w]*)/;
 function IsValidFacebookUrl(url) {
 	return FacebookRegex.test(url);
 }
 
 const ValidBloodTypes = ["O", "A", "B", "AB", "Unknown"];
-function IsValidBloodType(BloodType){
+function IsValidBloodType(BloodType) {
 	const Index = Number(BloodType);
-	if (!Index){
+	if (!Index) {
 		console.log("No index");
 		return null;
 	}
-	if (Index < 0 || Index > ValidBloodTypes.length){
+	if (Index < 0 || Index > ValidBloodTypes.length) {
 		return null;
 	}
 	return ValidBloodTypes[Index];
@@ -111,12 +106,12 @@ const LevelLUT = {
 	STAFF: 1,
 	PARTICIPANT: 0,
 };
-function ValidateRoles(Role, RequiredLevel){
-    const LookupLevel = LevelLUT[Role];
-    if (!(LookupLevel && LookupLevel >= RequiredLevel)){
-        return false;
-    }
-    return true;
+function ValidateRoles(Role, RequiredLevel) {
+	const LookupLevel = LevelLUT[Role];
+	if (!(LookupLevel && LookupLevel >= RequiredLevel)) {
+		return false;
+	}
+	return true;
 }
 
 module.exports = {

@@ -12,5 +12,5 @@ module.exports = {
     rules: {
         "prefer-const": "error",
     },
-    // extends: "eslint:recommended",
+    extends: "eslint:recommended",
 };
