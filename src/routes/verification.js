@@ -20,7 +20,7 @@ router.get("/email/:token", async (req, res) => {
 				SendVerifyEmail(decoded.email);
 				return res.status(403).json({ message: "Verify link expired, please check your mailbox for a new verification link" });
 			}
-			return res.wstatus(500).json({ message: "Internal server error" });
+			return res.status(500).json({ message: "Internal server error" });
 		}
 		const TempAccessToken = await GenerateTempAccessToken(decoded.Email);
 		return res.status(200).json({

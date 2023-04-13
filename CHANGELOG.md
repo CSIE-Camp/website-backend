@@ -303,3 +303,7 @@
   **Changed**
   - DEBUG
   - config.js updated
+
+  ### 2023-04-13 16:55 (Maxx) ###
+  **Changed**
+  - Bug fix in /src/routes/verification
