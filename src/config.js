@@ -13,6 +13,7 @@ module.exports = {
     EMAIL_TOKEN_EXPIRE: process.env.EMAIL_TOKEN_EXPIRE,
     RESET_PASSWORD_SECRET: process.env.RESET_PASSWORD_SECRET,
     RESET_PASSWORD_EXPIRE: process.env.RESET_PASSWORD_EXPIRE,
+    SALTROUNDS: process.env.SALTROUNDS,
     CLIENT_URL: process.env.CLIENT_URL,
     PORT: Number(process.env.PORT) || 8080
 }
